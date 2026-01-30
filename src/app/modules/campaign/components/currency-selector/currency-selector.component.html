@@ -16,15 +16,13 @@
   <!-- Fixed position dropdown -->
   <div class="currency-dropdown-fixed" 
        *ngIf="showDropdown" 
-       [style.top.px]="dropdownPosition.top"
-       [style.left.px]="dropdownPosition.left"
-       [style.minWidth.px]="dropdownPosition.width"
+       [ngStyle]="getDropdownStyles()"
        (click)="$event.stopPropagation()">
     
     <!-- Mobile close button -->
     <div class="dropdown-header d-flex justify-content-between align-items-center d-md-none">
       <span class="fw-bold">Select Currency</span>
-      <button class="btn-close" (click)="closeDropdown()"></button>
+      <button class="btn-close" (click)="closeDropdown()">&times;</button>
     </div>
     
     <!-- Desktop header -->
@@ -34,20 +32,6 @@
     </div>
     
     <div class="dropdown-divider"></div>
-    
-    <!-- Current selection for mobile -->
-    <div class="current-selection-mobile p-3 d-block d-md-none">
-      <div class="text-muted small mb-2">Currently selected:</div>
-      <div class="d-flex align-items-center">
-        <div class="currency-symbol-option badge bg-primary me-2">
-          {{ currentCurrency.symbol }}
-        </div>
-        <div>
-          <div class="fw-bold">{{ currentCurrency.code }}</div>
-          <div class="text-muted small">{{ currentCurrency.name }}</div>
-        </div>
-      </div>
-    </div>
     
     <!-- Currency list -->
     <div class="currency-list">
@@ -60,9 +44,6 @@
             <span class="currency-code-option fw-bold">{{ currency.code }}</span>
             <span class="currency-symbol-option ms-2 badge bg-light text-dark">
               {{ currency.symbol }}
-            </span>
-            <span class="ms-2 small text-muted d-none d-md-inline">
-              {{ currency.symbolPosition === 'after' ? '(after)' : '(before)' }}
             </span>
           </div>
           <div class="currency-name text-muted small">{{ currency.name }}</div>

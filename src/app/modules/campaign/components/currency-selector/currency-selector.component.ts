@@ -58,7 +58,6 @@ export class CurrencySelectorComponent implements OnInit {
     
     if (this.showDropdown) {
       if (this.isMobile) {
-        // Center the dropdown on mobile
         this.centerDropdownOnMobile();
       } else {
         this.calculateDropdownPosition();
@@ -72,10 +71,10 @@ export class CurrencySelectorComponent implements OnInit {
   centerDropdownOnMobile(): void {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    const dropdownWidth = 320; // Match your SCSS max-width
+    const dropdownWidth = 320;
     
     this.dropdownPosition = {
-      top: viewportHeight / 2 - 200, // Center vertically (assuming ~400px height)
+      top: viewportHeight / 2 - 200,
       left: (viewportWidth - dropdownWidth) / 2,
       width: dropdownWidth
     };
@@ -89,30 +88,45 @@ export class CurrencySelectorComponent implements OnInit {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
     
-    // Calculate position below the button
     this.dropdownPosition = {
-      top: rect.bottom + scrollTop + 5, // 5px gap
+      top: rect.bottom + scrollTop + 5,
       left: rect.left + scrollLeft,
-      width: Math.max(rect.width, 280) // Minimum width from SCSS
+      width: Math.max(rect.width, 280)
     };
     
-    // Check if dropdown would go off screen on the right
     const dropdownRight = this.dropdownPosition.left + this.dropdownPosition.width;
     const viewportWidth = window.innerWidth;
     
-    if (dropdownRight > viewportWidth - 20) { // 20px margin
+    if (dropdownRight > viewportWidth - 20) {
       this.dropdownPosition.left = viewportWidth - this.dropdownPosition.width - 20;
     }
+  }
+
+  getDropdownStyles(): any {
+    const styles: any = {
+      'background': '#fff',
+      'border': '1px solid #dee2e6',
+      'border-radius': '8px',
+      'box-shadow': '0 10px 40px rgba(0,0,0,0.2)',
+      'z-index': '99999',
+      'max-height': '80vh',
+      'overflow-y': 'auto',
+      'min-width': '280px'
+    };
     
-    // Check if dropdown would go off screen at the bottom (mobile)
     if (this.isMobile) {
-      const dropdownBottom = this.dropdownPosition.top + 400; // Estimated height
-      const viewportHeight = window.innerHeight;
-      
-      if (dropdownBottom > viewportHeight - 20) {
-        this.dropdownPosition.top = Math.max(20, viewportHeight - 420);
-      }
+      styles['top'] = '50%';
+      styles['left'] = '50%';
+      styles['transform'] = 'translate(-50%, -50%)';
+      styles['width'] = '90%';
+      styles['max-width'] = '320px';
+    } else {
+      styles['top'] = this.dropdownPosition.top + 'px';
+      styles['left'] = this.dropdownPosition.left + 'px';
+      styles['min-width'] = this.dropdownPosition.width + 'px';
     }
+    
+    return styles;
   }
 
   closeDropdown(): void {
@@ -126,12 +140,10 @@ export class CurrencySelectorComponent implements OnInit {
       this.currentCurrency = currency;
       
       if (!this.isMobile) {
-        // Auto-reload on desktop
         setTimeout(() => {
           window.location.reload();
         }, 300);
       }
-      // On mobile, we keep the dropdown open so user can click "Apply & Reload"
     }
   }
 
