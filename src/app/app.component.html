@@ -1,13 +1,17 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
+<<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
   <div class="container">
     <a class="navbar-brand fw-bold text-primary" routerLink="/">
       <i class="fas fa-chart-line me-2"></i>
       Campaign Tracker
     </a>
     
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+    <!-- Mobile header with currency selector -->
+    <div class="d-flex align-items-center d-lg-none">
+      <app-currency-selector class="me-3"></app-currency-selector>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
     
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
@@ -26,8 +30,8 @@
       </ul>
       
       <div class="d-flex align-items-center">
-        <!-- Currency Selector -->
-        <app-currency-selector class="me-3"></app-currency-selector>
+        <!-- Currency Selector (desktop) -->
+        <app-currency-selector class="me-3 d-none d-lg-block"></app-currency-selector>
         
         <!-- Stats Summary -->
         <div class="d-none d-md-flex align-items-center">
