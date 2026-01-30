@@ -1,0 +1,206 @@
+/* ========== CURRENCY SELECTOR - FIXED POSITION SOLUTION ========== */
+.currency-selector {
+  position: relative;
+  display: inline-block;
+  
+  .currency-toggle {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 8px 16px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    
+    &:hover {
+      background-color: #f8f9fa;
+      border-color: #adb5bd;
+    }
+    
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+    }
+    
+    .currency-code {
+      font-size: 14px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+    
+    .currency-symbol {
+      font-size: 12px;
+      display: block;
+      opacity: 0.8;
+    }
+    
+    .fa-chevron-down {
+      transition: transform 0.2s ease;
+      font-size: 12px;
+      margin-left: 8px;
+      
+      &.rotate {
+        transform: rotate(180deg);
+      }
+    }
+  }
+  
+  /* FIXED POSITION DROPDOWN - This will appear above everything */
+  .currency-dropdown-fixed {
+    position: fixed !important;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    z-index: 99999 !important; /* Extremely high z-index */
+    animation: dropdownFadeIn 0.2s ease;
+    max-height: 80vh;
+    overflow-y: auto;
+    min-width: 280px;
+    
+    .dropdown-header {
+      padding: 12px 16px;
+      font-weight: 600;
+      color: #212529;
+      border-bottom: 1px solid #f1f3f5;
+      display: flex;
+      align-items: center;
+      background: #f8f9fa;
+      border-radius: 8px 8px 0 0;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    
+    .dropdown-divider {
+      height: 1px;
+      background-color: #f1f3f5;
+      margin: 0;
+    }
+    
+    .currency-list {
+      padding: 8px 0;
+      
+      .currency-option {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 12px 16px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: left;
+        
+        &:hover {
+          background-color: #f8f9fa;
+        }
+        
+        &.active {
+          background-color: #e8f4ff;
+          position: relative;
+          
+          &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: #0d6efd;
+          }
+        }
+        
+        .currency-info {
+          flex: 1;
+          
+          .currency-code-option {
+            font-size: 14px;
+            font-weight: 600;
+          }
+          
+          .currency-symbol-option {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+          }
+          
+          .currency-name {
+            font-size: 12px;
+            margin-top: 2px;
+          }
+          
+          .exchange-rate {
+            font-size: 11px;
+            color: #6c757d;
+            margin-top: 2px;
+          }
+        }
+        
+        .currency-selection {
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          
+          .fa-check {
+            color: #0d6efd;
+            font-size: 14px;
+          }
+        }
+      }
+    }
+    
+    .dropdown-footer {
+      padding: 10px 16px;
+      font-size: 11px;
+      color: #6c757d;
+      border-top: 1px solid #f1f3f5;
+      display: flex;
+      align-items: center;
+      background: #f8f9fa;
+      border-radius: 0 0 8px 8px;
+      position: sticky;
+      bottom: 0;
+      
+      i {
+        margin-right: 6px;
+      }
+    }
+  }
+}
+
+/* Body class when dropdown is open */
+body.dropdown-open {
+  overflow: hidden !important;
+  position: fixed;
+  width: 100%;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .currency-selector {
+    .currency-dropdown-fixed {
+      position: fixed !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      width: 90% !important;
+      max-width: 320px !important;
+      max-height: 70vh !important;
+      min-width: unset !important;
+    }
+  }
+}

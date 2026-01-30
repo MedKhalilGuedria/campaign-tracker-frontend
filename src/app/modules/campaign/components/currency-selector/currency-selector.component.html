@@ -1,0 +1,55 @@
+<div class="currency-selector">
+  <button class="currency-toggle btn btn-outline-secondary" 
+          (click)="toggleDropdown($event)"
+          type="button"
+          [attr.aria-expanded]="showDropdown">
+    <div class="d-flex align-items-center">
+      <i class="fas fa-money-bill-wave me-2"></i>
+      <div class="text-start">
+        <div class="currency-code fw-medium">{{ currentCurrency.code }}</div>
+        <small class="currency-symbol text-muted">{{ currentCurrency.symbol }}</small>
+      </div>
+      <i class="fas fa-chevron-down ms-2" [class.rotate]="showDropdown"></i>
+    </div>
+  </button>
+  
+  <!-- Fixed position dropdown - will appear above everything -->
+  <div class="currency-dropdown-fixed" 
+       *ngIf="showDropdown" 
+       [style.top.px]="dropdownPosition.top"
+       [style.left.px]="dropdownPosition.left"
+       [style.minWidth.px]="dropdownPosition.width"
+       (click)="$event.stopPropagation()">
+    
+   
+    
+    <div class="dropdown-divider"></div>
+    
+    <div class="currency-list">
+      <button class="currency-option" 
+              *ngFor="let currency of currencies"
+              (click)="selectCurrency(currency)"
+              [class.active]="currency.code === currentCurrency.code">
+        <div class="currency-info">
+          <div class="d-flex align-items-center mb-1">
+            <span class="currency-code-option fw-bold">{{ currency.code }}</span>
+            <span class="currency-symbol-option ms-2 badge bg-light text-dark">
+              {{ currency.symbol }}
+            </span>
+            <span class="ms-2 small text-muted">
+              {{ currency.symbolPosition === 'after' ? '(after)' : '(before)' }}
+            </span>
+          </div>
+          <div class="currency-name text-muted small">{{ currency.name }}</div>
+          <div class="exchange-rate text-muted small mt-1">
+            {{ getExchangeRateInfo(currency) }}
+          </div>
+        </div>
+        <div class="currency-selection">
+          <i class="fas fa-check text-primary" *ngIf="currency.code === currentCurrency.code"></i>
+        </div>
+      </button>
+    </div>
+    
+  </div>
+</div>

@@ -1,0 +1,157 @@
+<div class="container" *ngIf="campaign; else loading">
+  <!-- Back Button -->
+  <div class="mb-4">
+    <button class="btn btn-outline-secondary" routerLink="/campaigns">
+      <i class="fas fa-arrow-left me-2"></i>Back to Campaigns
+    </button>
+  </div>
+
+  <!-- Header Section -->
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <div class="d-flex align-items-center">
+        <div class="me-3">
+          <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+               style="width: 60px; height: 60px; font-size: 24px; font-weight: bold;">
+            {{ campaign.name.charAt(0) }}
+          </div>
+        </div>
+        <div>
+          <h1 class="display-6 mb-1" style="color: var(--dark-color);">{{ campaign.name }}</h1>
+          <p class="text-muted mb-0">
+            Created on {{ campaign.created_at | date:'fullDate' }}
+            | ID: #{{ campaign.id }}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 text-md-end">
+      <div class="balance-display">
+        <small class="d-block mb-1" style="opacity: 0.9;">CURRENT BALANCE</small>
+        <h2 class="mb-0" [ngClass]="{
+          'text-success': campaign.current_balance > 0,
+          'text-warning': campaign.current_balance === 0,
+          'text-danger': campaign.current_balance < 0
+        }">
+          {{ campaign.current_balance | currencyFormat  }}
+        </h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="row mb-4">
+    <div class="col-md-3 col-6">
+      <div class="card text-center py-3">
+        <div class="stat-value text-primary">{{ campaign.start_balance | currencyFormat  }}</div>
+        <div class="stat-label">Initial Balance</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="card text-center py-3">
+        <div class="stat-value text-success">{{ campaign.total_deposits | currencyFormat  }}</div>
+        <div class="stat-label">Total Deposits</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="card text-center py-3">
+        <div class="stat-value text-danger">{{ campaign.total_withdrawals | currencyFormat  }}</div>
+        <div class="stat-label">Total Withdrawals</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="card text-center py-3">
+        <div class="stat-value" [ngClass]="{
+          'text-success': campaign.current_balance >= campaign.start_balance,
+          'text-danger': campaign.current_balance < campaign.start_balance
+        }">
+          {{ ((campaign.current_balance - campaign.start_balance) / campaign.start_balance * 100) | number:'1.0-0' }}%
+        </div>
+        <div class="stat-label">Profit/Loss</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <app-balance-chart 
+        *ngIf="campaign"
+        [campaign]="campaign"
+        [transactions]="transactions"
+        [bets]="bets">
+      </app-balance-chart>
+    </div>
+  </div>
+
+  <!-- Action Section -->
+  <div class="row mb-5">
+    <div class="col-md-6">
+      <app-transaction-create 
+        [campaignId]="campaign.id" 
+        (transactionAdded)="onTransactionAdded()">
+      </app-transaction-create>
+    </div>
+    <div class="col-md-6">
+      <app-bet-create 
+        [campaignId]="campaign.id" 
+        [currentBalance]="campaign.current_balance"
+        (betPlaced)="onBetPlaced()">
+      </app-bet-create>
+    </div>
+  </div>
+
+  <!-- History Section -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="fas fa-exchange-alt me-2 text-primary"></i>
+            Transaction History
+          </h5>
+          <span class="badge bg-primary">
+            {{ transactions.length }} Transactions
+          </span>
+        </div>
+        <div class="card-body">
+          <app-transaction-list 
+            [campaignId]="campaign.id"
+            (transactionAdded)="onTransactionAdded()">
+          </app-transaction-list>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="fas fa-trophy me-2 text-warning"></i>
+            Betting History
+          </h5>
+          <span class="badge bg-warning">
+            {{ bets.length }} Bets
+          </span>
+        </div>
+        <div class="card-body">
+          <app-bet-list 
+            [campaignId]="campaign.id"
+            (betPlaced)="onBetPlaced()">
+          </app-bet-list>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Template -->
+<ng-template #loading>
+  <div class="container">
+    <div class="spinner-container">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  </div>
+</ng-template>

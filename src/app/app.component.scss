@@ -1,0 +1,21 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.navbar {
+  margin-bottom: 30px;
+  border-radius: 0 0 15px 15px;
+}
+
+.nav-link.active {
+  background: var(--primary-color) !important;
+  color: white !important;
+  border-radius: 8px;
+}
+
+footer {
+  margin-top: auto;
+  border-radius: 15px 15px 0 0;
+}

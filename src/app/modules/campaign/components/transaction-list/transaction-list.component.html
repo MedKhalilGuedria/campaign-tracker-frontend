@@ -1,0 +1,24 @@
+<h3>Transactions</h3>
+<div *ngIf="transactions.length === 0" class="alert alert-info">
+  No transactions yet.
+</div>
+<table *ngIf="transactions.length > 0" class="table table-sm">
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Amount</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let t of transactions">
+      <td>
+        <span [ngClass]="{'badge badge-success': t.type === 'deposit', 'badge badge-danger': t.type === 'withdrawal'}">
+          {{ t.type | titlecase }}
+        </span>
+      </td>
+      <td>{{ t.amount | currencyFormat }}</td>
+      <td>{{ t.created_at | date:'short' }}</td>
+    </tr>
+  </tbody>
+</table>

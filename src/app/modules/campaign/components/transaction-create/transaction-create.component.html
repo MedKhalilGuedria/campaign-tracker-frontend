@@ -1,0 +1,25 @@
+<h4>Add Transaction</h4>
+<div class="card">
+  <div class="card-body">
+    <div class="form-group">
+      <label>Type</label>
+      <select class="form-control" [(ngModel)]="type">
+        <option value="deposit">Deposit</option>
+        <option value="withdrawal">Withdrawal</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Amount</label>
+      <input type="number" class="form-control" [(ngModel)]="amount" step="0.01" min="0">
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+
+    <button class="btn btn-primary" (click)="submit()">
+      {{ type === 'deposit' ? 'Deposit' : 'Withdraw' }}
+    </button>
+  </div>
+</div>

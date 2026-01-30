@@ -1,0 +1,112 @@
+<div class="bet-result">
+  <!-- Current Status -->
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <span class="fw-medium">Status:</span>
+    <span class="badge" [ngClass]="'bg-' + getResultClass(bet.result)">
+      {{ bet.result | titlecase }}
+    </span>
+  </div>
+
+  <!-- Profit/Loss -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="fw-medium">P/L:</span>
+    <span [ngClass]="{
+      'text-success': bet.profit_loss > 0,
+      'text-danger': bet.profit_loss < 0,
+      'text-muted': bet.profit_loss === 0
+    }">
+      {{ bet.profit_loss | currencyFormat }}
+    </span>
+  </div>
+
+  <!-- Update Button -->
+  <button class="btn btn-sm btn-outline-primary w-100" (click)="toggleForm()">
+    <i class="fas fa-edit me-1"></i>
+    {{ showForm ? 'Cancel' : 'Update Result' }}
+  </button>
+
+  <!-- Update Form -->
+  <div class="card mt-3" *ngIf="showForm">
+    <div class="card-body">
+      <h6 class="card-title">Update Bet Result</h6>
+      
+      <!-- Result Selection -->
+      <div class="mb-3">
+        <label class="form-label">Result</label>
+        <div class="btn-group w-100" role="group">
+          <button type="button" 
+                  class="btn" 
+                  [class.btn-success]="selectedResult === 'win'"
+                  [class.btn-outline-success]="selectedResult !== 'win'"
+                  (click)="selectedResult = 'win'">
+            Win
+          </button>
+          <button type="button" 
+                  class="btn" 
+                  [class.btn-danger]="selectedResult === 'loss'"
+                  [class.btn-outline-danger]="selectedResult !== 'loss'"
+                  (click)="selectedResult = 'loss'">
+            Loss
+          </button>
+          <button type="button" 
+                  class="btn" 
+                  [class.btn-warning]="selectedResult === 'pending'"
+                  [class.btn-outline-warning]="selectedResult !== 'pending'"
+                  (click)="selectedResult = 'pending'">
+            Pending
+          </button>
+        </div>
+      </div>
+
+      <!-- Profit/Loss Input (only for win/loss) -->
+      <div class="mb-3" *ngIf="selectedResult !== 'pending'">
+        <label class="form-label">
+          {{ selectedResult === 'win' ? 'Profit' : 'Loss' }} Amount
+          <small class="text-muted ms-1">
+            (Potential: {{ calculatePotentialProfit() | currencyFormat }})
+          </small>
+        </label>
+        <div class="input-group">
+          <span class="input-group-text">
+            {{ selectedResult === 'win' ? '+' : '-' }}
+          </span>
+          <input type="number" 
+                 class="form-control" 
+                 [(ngModel)]="profitLoss"
+                 [step]="0.01"
+                 [min]="0"
+                 [placeholder]="calculatePotentialProfit().toString()">
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="alert" 
+           [ngClass]="{
+             'alert-success': selectedResult === 'win',
+             'alert-danger': selectedResult === 'loss',
+             'alert-warning': selectedResult === 'pending'
+           }">
+        <div class="d-flex justify-content-between">
+          <span>Stake:</span>
+          <strong>{{ bet.stake | currencyFormat }}</strong>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span>Odds:</span>
+          <strong>{{ bet.odds }}</strong>
+        </div>
+        <div class="d-flex justify-content-between" *ngIf="selectedResult !== 'pending'">
+          <span>Profit/Loss:</span>
+          <strong>{{ profitLoss | currencyFormat }}</strong>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-grid gap-2">
+        <button class="btn btn-primary" (click)="saveResult()">
+          <i class="fas fa-save me-1"></i>
+          Save Result
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
