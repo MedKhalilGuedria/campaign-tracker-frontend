@@ -13,11 +13,11 @@ export interface Currency {
 })
 export class CurrencyService {
   private currentCurrency: Currency = {
-    code: 'USD',
-    symbol: '$',
-    name: 'US Dollar',
-    exchangeRate: 1,
-    symbolPosition: 'before'
+    code: 'TND',
+    symbol: 'DT',
+    name: 'Tunisian Dinar',
+    exchangeRate: 3.12,
+    symbolPosition: 'after'
   };
 
   private availableCurrencies: Currency[] = [
