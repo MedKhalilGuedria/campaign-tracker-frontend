@@ -1,4 +1,3 @@
-// bet-create.component.ts
 import { Component, Input, EventEmitter, Output } from '@angular/core';
 import { BetService } from '../../services/bet.service';
 import { CampaignService } from '../../services/campaign.service';
@@ -10,15 +9,14 @@ import { CurrencyService } from '../../services/currency.service';
   styleUrls: ['./bet-create.component.scss']
 })
 export class BetCreateComponent {
-
   @Input() campaignId!: number;
   @Input() currentBalance!: number;
   @Output() betPlaced = new EventEmitter<void>();
 
   sport = '';
   odds = 0;
-  stake: number | null = null; // Null means "use all balance"
-  useFullBalance = true; // Checkbox state
+  stake: number | null = null;
+  useFullBalance = true;
   errorMessage = '';
 
   constructor(
@@ -26,6 +24,19 @@ export class BetCreateComponent {
     private campaignService: CampaignService,
     public currencyService: CurrencyService
   ) { }
+
+  // Handle checkbox change immediately
+  onUseFullBalanceChange(checked: boolean): void {
+    this.useFullBalance = checked;
+    
+    if (checked) {
+      // Using full balance - clear stake
+      this.stake = null;
+    } else {
+      // Custom stake - set to current balance by default
+      this.stake = this.currencyService.displayAmount(this.currentBalance);
+    }
+  }
 
   submit(): void {
     const availableBalance = this.currencyService.displayAmount(this.currentBalance);
@@ -46,7 +57,7 @@ export class BetCreateComponent {
       return;
     }
 
-    // Calculate stake
+    // Calculate stake - can be number or null
     let stakeToSend: number | null = null;
     if (!this.useFullBalance) {
       if (!this.stake || this.stake <= 0) {
@@ -54,7 +65,8 @@ export class BetCreateComponent {
         return;
       }
       if (this.stake > availableBalance) {
-        this.errorMessage = `Stake exceeds available balance of ${availableBalance }`;
+        const formattedBalance = this.currencyService.formatCurrency(availableBalance);
+        this.errorMessage = `Stake exceeds available balance of ${formattedBalance}`;
         return;
       }
       // Convert stake back to USD for API
@@ -86,21 +98,6 @@ export class BetCreateComponent {
     this.errorMessage = '';
   }
 
-  toggleUseFullBalance(): void {
-    this.useFullBalance = !this.useFullBalance;
-    if (this.useFullBalance) {
-      this.stake = null;
-    } else {
-      // Set stake to current balance by default when switching to custom stake
-      this.stake = this.currencyService.displayAmount(this.currentBalance);
-    }
-  }
-
-  get potentialWin(): number {
-    const stakeAmount = this.calculateStake();
-    return stakeAmount * this.odds;
-  }
-
   calculateStake(): number {
     if (this.useFullBalance) {
       return this.currencyService.displayAmount(this.currentBalance);
@@ -109,8 +106,18 @@ export class BetCreateComponent {
     }
   }
 
+  get potentialWin(): number {
+    const stakeAmount = this.calculateStake();
+    return stakeAmount * this.odds;
+  }
+
   get remainingBalance(): number {
     const stakeAmount = this.calculateStake();
     return this.currencyService.displayAmount(this.currentBalance) - stakeAmount;
+  }
+
+  get potentialProfit(): number {
+    const stakeAmount = this.calculateStake();
+    return (stakeAmount * this.odds) - stakeAmount;
   }
 }
