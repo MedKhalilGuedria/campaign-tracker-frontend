@@ -40,6 +40,10 @@ export class CurrencyService {
       }
     }
   }
+getCurrencySymbol(): string {
+  // Use this.currentCurrency.symbol directly (it's already available)
+  return this.currentCurrency.symbol;
+}
 
   getCurrentCurrency(): Currency {
     return this.currentCurrency;
@@ -117,4 +121,6 @@ export class CurrencyService {
   saveAmount(amountInSelectedCurrency: number): number {
     return this.convertToUSD(amountInSelectedCurrency);
   }
+
+  
 }
