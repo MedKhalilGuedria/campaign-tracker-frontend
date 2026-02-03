@@ -1,7 +1,8 @@
+// bet-create.component.ts
 import { Component, Input, EventEmitter, Output } from '@angular/core';
 import { BetService } from '../../services/bet.service';
 import { CampaignService } from '../../services/campaign.service';
-import { CurrencyService } from '../../services/currency.service'; // Add this
+import { CurrencyService } from '../../services/currency.service';
 
 @Component({
   selector: 'app-bet-create',
@@ -16,16 +17,21 @@ export class BetCreateComponent {
 
   sport = '';
   odds = 0;
+  stake: number | null = null; // Null means "use all balance"
+  useFullBalance = true; // Checkbox state
   errorMessage = '';
 
   constructor(
     private betService: BetService,
     private campaignService: CampaignService,
-    public currencyService: CurrencyService // Inject CurrencyService
+    public currencyService: CurrencyService
   ) { }
 
   submit(): void {
-    if (this.currentBalance <= 0) {
+    const availableBalance = this.currencyService.displayAmount(this.currentBalance);
+    
+    // Validation
+    if (availableBalance <= 0) {
       this.errorMessage = 'No balance available to place bet';
       return;
     }
@@ -40,17 +46,30 @@ export class BetCreateComponent {
       return;
     }
 
+    // Calculate stake
+    let stakeToSend: number | null = null;
+    if (!this.useFullBalance) {
+      if (!this.stake || this.stake <= 0) {
+        this.errorMessage = 'Stake must be greater than 0';
+        return;
+      }
+      if (this.stake > availableBalance) {
+        this.errorMessage = `Stake exceeds available balance of ${availableBalance }`;
+        return;
+      }
+      // Convert stake back to USD for API
+      stakeToSend = this.currencyService.convertToUSD(this.stake);
+    }
+
     this.betService.create({
       campaign_id: this.campaignId,
       sport: this.sport,
-      odds: this.odds
+      odds: this.odds,
+      stake: stakeToSend
     }).subscribe({
       next: () => {
-        this.sport = '';
-        this.odds = 0;
-        this.errorMessage = '';
+        this.resetForm();
         this.betPlaced.emit();
-        // Refresh campaign data
         this.campaignService.get(this.campaignId).subscribe();
       },
       error: (error) => {
@@ -59,9 +78,39 @@ export class BetCreateComponent {
     });
   }
 
+  resetForm(): void {
+    this.sport = '';
+    this.odds = 0;
+    this.stake = null;
+    this.useFullBalance = true;
+    this.errorMessage = '';
+  }
+
+  toggleUseFullBalance(): void {
+    this.useFullBalance = !this.useFullBalance;
+    if (this.useFullBalance) {
+      this.stake = null;
+    } else {
+      // Set stake to current balance by default when switching to custom stake
+      this.stake = this.currencyService.displayAmount(this.currentBalance);
+    }
+  }
+
   get potentialWin(): number {
-    // Convert current balance from USD to selected currency for display
-    const currentBalanceInSelectedCurrency = this.currencyService.displayAmount(this.currentBalance);
-    return currentBalanceInSelectedCurrency * this.odds;
+    const stakeAmount = this.calculateStake();
+    return stakeAmount * this.odds;
+  }
+
+  calculateStake(): number {
+    if (this.useFullBalance) {
+      return this.currencyService.displayAmount(this.currentBalance);
+    } else {
+      return this.stake || 0;
+    }
+  }
+
+  get remainingBalance(): number {
+    const stakeAmount = this.calculateStake();
+    return this.currencyService.displayAmount(this.currentBalance) - stakeAmount;
   }
 }

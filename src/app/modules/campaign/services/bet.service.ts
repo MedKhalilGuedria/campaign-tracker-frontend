@@ -13,6 +13,18 @@ export interface Bet {
   created_at: string;
 }
 
+export interface CreateBetData {
+  campaign_id: number;
+  sport: string;
+  odds: number;
+  stake?: number | null;  // Allow both null and undefined
+}
+
+export interface UpdateBetData {
+  result: string;
+  profit_loss: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -25,15 +37,20 @@ export class BetService {
     return this.http.get<Bet[]>(`${this.apiUrl}/campaign/${campaignId}`);
   }
 
-  create(data: { campaign_id: number; sport: string; odds: number }): Observable<Bet> {
+  create(data: CreateBetData): Observable<Bet> {
     return this.http.post<Bet>(this.apiUrl, data);
   }
 
-   // NEW: Update bet result
-  updateResult(betId: number, result: string, profitLoss?: number): Observable<Bet> {
+  // Update bet result with explicit parameters
+  updateResult(betId: number, result: string, profitLoss: number = 0): Observable<Bet> {
     return this.http.patch<Bet>(`${this.apiUrl}/${betId}`, {
       result,
-      profit_loss: profitLoss || 0
+      profit_loss: profitLoss
     });
+  }
+
+  // Alternative update method using UpdateBetData interface
+  updateBet(betId: number, data: UpdateBetData): Observable<Bet> {
+    return this.http.patch<Bet>(`${this.apiUrl}/${betId}`, data);
   }
 }

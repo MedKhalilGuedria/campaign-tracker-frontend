@@ -1,14 +1,45 @@
+<!-- bet-create.component.html -->
 <h4>Place Bet</h4>
 <div class="card">
   <div class="card-body">
-    <!-- Convert and display balance in selected currency -->
-    <div class="alert alert-info" *ngIf="currencyService.displayAmount(currentBalance) > 0">
+    <!-- Available Balance -->
+    <div class="alert alert-info">
       Available Balance: {{ currentBalance | currencyFormat }}
     </div>
-    <div class="alert alert-warning" *ngIf="currencyService.displayAmount(currentBalance) <= 0">
-      No balance available to place bet. Please deposit first.
+
+    <!-- Stake Selection -->
+    <div class="form-group">
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" 
+               id="useFullBalance" 
+               [(ngModel)]="useFullBalance"
+               (change)="toggleUseFullBalance()">
+        <label class="form-check-label" for="useFullBalance">
+          Use all available balance ({{ currentBalance | currencyFormat }})
+        </label>
+      </div>
+
+      <div *ngIf="!useFullBalance" class="stake-input">
+        <label for="stake">Stake Amount</label>
+        <div class="input-group">
+          <input type="number" class="form-control" 
+                 id="stake"
+                 [(ngModel)]="stake"
+                 step="0.01"
+                 min="1"
+                 [max]="currencyService.displayAmount(currentBalance)"
+                 [disabled]="currencyService.displayAmount(currentBalance) <= 0">
+          <div class="input-group-append">
+            <span class="input-group-text">{{ currencyService.getCurrencySymbol() }}</span>
+          </div>
+        </div>
+        <small class="form-text text-muted">
+          Available: {{ currentBalance | currencyFormat }}
+        </small>
+      </div>
     </div>
 
+    <!-- Sport Input -->
     <div class="form-group">
       <label>Sport</label>
       <input class="form-control" placeholder="e.g., Football, Basketball" 
@@ -16,30 +47,54 @@
              [disabled]="currencyService.displayAmount(currentBalance) <= 0">
     </div>
 
+    <!-- Odds Input -->
     <div class="form-group">
       <label>Odds</label>
-      <input type="number" class="form-control" 
-             [(ngModel)]="odds" 
-             step="0.01" 
-             min="1" 
-             [disabled]="currencyService.displayAmount(currentBalance) <= 0">
-    </div>
-
-    <div class="form-group" *ngIf="odds > 1 && currencyService.displayAmount(currentBalance) > 0">
-      <label>Potential Win:</label>
-      <div class="alert alert-success">
-        {{ potentialWin | currencyFormat }} 
-        (Stake: {{ currencyService.displayAmount(currentBalance) | currencyFormat }} × {{ odds }})
+      <div class="input-group">
+        <input type="number" class="form-control" 
+               [(ngModel)]="odds" 
+               step="0.01" 
+               min="1" 
+               [disabled]="currencyService.displayAmount(currentBalance) <= 0">
+        <div class="input-group-append">
+          <span class="input-group-text">Decimal</span>
+        </div>
       </div>
     </div>
 
+    <!-- Bet Summary -->
+    <div *ngIf="odds > 1 && currencyService.displayAmount(currentBalance) > 0" class="alert alert-success">
+      <div class="row">
+        <div class="col">
+          <strong>Stake:</strong> {{ calculateStake() | currencyFormat }}
+        </div>
+        <div class="col">
+          <strong>Odds:</strong> {{ odds }}
+        </div>
+        <div class="col">
+          <strong>Potential Win:</strong> {{ potentialWin | currencyFormat }}
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col">
+          <strong>Remaining Balance:</strong> {{ remainingBalance | currencyFormat }}
+        </div>
+        <div class="col">
+          <strong>Profit:</strong> {{ potentialWin - calculateStake() | currencyFormat }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Message -->
     <div *ngIf="errorMessage" class="alert alert-danger">
       {{ errorMessage }}
     </div>
 
- <button class="btn btn-warning" 
-        (click)="submit()" 
-        [disabled]="currentBalance <= 0">  <!-- currentBalance is in TND -->
-  Place Bet (Stake: {{ currentBalance | currencyFormat }})  <!-- Show 20 DT -->
-</button>
+    <!-- Submit Button -->
+    <button class="btn btn-warning" 
+            (click)="submit()" 
+            [disabled]="currencyService.displayAmount(currentBalance) <= 0">
+      Place Bet (Stake: {{ calculateStake() | currencyFormat }})
+    </button>
+  </div>
 </div>
