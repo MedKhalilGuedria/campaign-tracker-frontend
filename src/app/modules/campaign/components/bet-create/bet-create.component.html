@@ -30,7 +30,7 @@
                  [max]="currencyService.displayAmount(currentBalance)"
                  [disabled]="currencyService.displayAmount(currentBalance) <= 0">
           <div class="input-group-append">
-            <span class="input-group-text">{{ currencyService.getCurrencySymbol() }}</span>
+            <span class="input-group-text">{{ currencyFormat}}</span>
           </div>
         </div>
         <small class="form-text text-muted">
