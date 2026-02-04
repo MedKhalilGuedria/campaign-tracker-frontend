@@ -10,6 +10,7 @@ import {
   DateFilter, 
   CampaignStats 
 } from '../../services/campaign-date-filter.service';
+import { CurrencyService } from '../../services/currency.service';
 
 @Component({
   selector: 'app-campaign-detail',
@@ -64,7 +65,8 @@ export class CampaignDetailComponent implements OnInit, OnDestroy {
     private transactionService: TransactionService,
     private betService: BetService,
     private goalService: GoalService,
-    private dateFilterService: CampaignDateFilterService
+    private dateFilterService: CampaignDateFilterService,
+    public currencyService: CurrencyService
   ) {}
 
   ngOnInit(): void {

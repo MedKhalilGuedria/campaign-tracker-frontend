@@ -2,6 +2,7 @@ import { Component, Input, OnInit, EventEmitter, Output, OnDestroy } from '@angu
 import { BetService, Bet } from '../../services/bet.service';
 import { CampaignDateFilterService, DateFilter } from '../../services/campaign-date-filter.service';
 import { Subscription } from 'rxjs';
+import { CurrencyService } from '../../services/currency.service';
 
 @Component({
   selector: 'app-bet-list',
@@ -20,7 +21,9 @@ export class BetListComponent implements OnInit, OnDestroy {
 
   constructor(
     private service: BetService,
-    private dateFilterService: CampaignDateFilterService
+    private dateFilterService: CampaignDateFilterService,
+    public currencyService: CurrencyService
+
   ) { }
 
   ngOnInit(): void {

@@ -98,12 +98,12 @@
             </div>
             <div class="col-6 mb-3">
               <div class="text-muted small">Total Staked</div>
-              <div class="h4">{{ performanceStats.totalStaked | currency }}</div>
+              <div class="h4">{{ performanceStats.totalStaked | currencyFormat }}</div>
             </div>
             <div class="col-6 mb-3">
               <div class="text-muted small">Total Profit/Loss</div>
               <div class="h4" [ngClass]="performanceStats.totalProfit >= 0 ? 'text-success' : 'text-danger'">
-                {{ performanceStats.totalProfit >= 0 ? '+' : '' }}{{ performanceStats.totalProfit | currency }}
+                {{ performanceStats.totalProfit >= 0 ? '+' : '' }}{{ performanceStats.totalProfit | currencyFormat }}
               </div>
             </div>
             <div class="col-6 mb-3">
@@ -168,17 +168,17 @@
           <div class="row">
             <div class="col-6 mb-3">
               <div class="text-muted small">Total Deposits</div>
-              <div class="h4 text-success">{{ transactionStats.totalDeposits | currency }}</div>
+              <div class="h4 text-success">{{ transactionStats.totalDeposits | currencyFormat }}</div>
             </div>
             <div class="col-6 mb-3">
               <div class="text-muted small">Total Withdrawals</div>
-              <div class="h4 text-danger">{{ transactionStats.totalWithdrawals | currency }}</div>
+              <div class="h4 text-danger">{{ transactionStats.totalWithdrawals | currencyFormat }}</div>
             </div>
             <div class="col-6 mb-3">
               <div class="text-muted small">Net Transactions</div>
               <div class="h4" [ngClass]="(transactionStats.totalDeposits - transactionStats.totalWithdrawals) >= 0 ? 'text-success' : 'text-danger'">
                 {{ (transactionStats.totalDeposits - transactionStats.totalWithdrawals) >= 0 ? '+' : '' }}
-                {{ transactionStats.totalDeposits - transactionStats.totalWithdrawals | currency }}
+                {{ transactionStats.totalDeposits - transactionStats.totalWithdrawals | currencyFormat }}
               </div>
             </div>
             <div class="col-6 mb-3">
@@ -187,11 +187,11 @@
             </div>
             <div class="col-6 mb-3">
               <div class="text-muted small">Largest Deposit</div>
-              <div class="h4 text-success">{{ transactionStats.largestDeposit | currency }}</div>
+              <div class="h4 text-success">{{ transactionStats.largestDeposit | currencyFormat }}</div>
             </div>
             <div class="col-6 mb-3">
               <div class="text-muted small">Largest Withdrawal</div>
-              <div class="h4 text-danger">{{ transactionStats.largestWithdrawal | currency }}</div>
+              <div class="h4 text-danger">{{ transactionStats.largestWithdrawal | currencyFormat }}</div>
             </div>
           </div>
           
@@ -208,7 +208,7 @@
                     -
                   </div>
                   <div class="text-success">
-                    +{{ transactionStats.bestDay.net | currency }}
+                    +{{ transactionStats.bestDay.net | currencyFormat }}
                   </div>
                 </div>
               </div>
@@ -224,7 +224,7 @@
                     -
                   </div>
                   <div class="text-danger">
-                    {{ transactionStats.worstDay.net | currency }}
+                    {{ transactionStats.worstDay.net | currencyFormat }}
                   </div>
                 </div>
               </div>

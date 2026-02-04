@@ -23,6 +23,7 @@ export class CampaignDateFilterComponent implements OnInit {
   selectedYear: number = new Date().getFullYear();
   startDate: string = '';
   endDate: string = '';
+  showFilterModal = false;
 
   constructor(private dateFilterService: CampaignDateFilterService) {
     const today = new Date();
@@ -48,15 +49,15 @@ export class CampaignDateFilterComponent implements OnInit {
     }
   }
 
-  // Handle filter type change with type safety
   onFilterTypeChange(type: string): void {
-    // Type guard to ensure type is valid
     if (type === 'all' || type === 'month' || type === 'custom') {
       this.currentFilter.type = type;
       this.applyFilter();
     }
   }
-
+closeModal(): void {
+  this.showFilterModal = false;
+}
   onMonthChange(): void {
     if (this.currentFilter.type === 'month') {
       this.currentFilter.month = this.selectedMonth;

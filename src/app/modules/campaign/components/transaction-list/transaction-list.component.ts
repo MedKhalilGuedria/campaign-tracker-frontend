@@ -2,6 +2,7 @@ import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { TransactionService, Transaction } from '../../services/transaction.service';
 import { CampaignDateFilterService, DateFilter } from '../../services/campaign-date-filter.service';
 import { Subscription } from 'rxjs';
+import { CurrencyService } from '../../services/currency.service';
 
 @Component({
   selector: 'app-transaction-list',
@@ -19,7 +20,9 @@ export class TransactionListComponent implements OnInit, OnDestroy {
 
   constructor(
     private service: TransactionService,
-    private dateFilterService: CampaignDateFilterService
+    private dateFilterService: CampaignDateFilterService,
+    public currencyService: CurrencyService
+
   ) { }
 
   ngOnInit(): void {
