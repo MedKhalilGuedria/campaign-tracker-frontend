@@ -132,7 +132,7 @@
                     -
                   </div>
                   <div class="text-success">
-                    +{{ performanceStats.bestDay.profit | currency }}
+                    +{{ performanceStats.bestDay.profit | currencyFormat }}
                   </div>
                 </div>
               </div>
@@ -148,7 +148,7 @@
                     -
                   </div>
                   <div class="text-danger">
-                    {{ performanceStats.worstDay.profit | currency }}
+                    {{ performanceStats.worstDay.profit | currencyFormat }}
                   </div>
                 </div>
               </div>

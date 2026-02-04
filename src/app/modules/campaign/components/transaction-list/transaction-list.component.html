@@ -44,7 +44,7 @@
             'text-success': transaction.type === 'deposit',
             'text-danger': transaction.type === 'withdrawal'
           }">
-            {{ transaction.type === 'deposit' ? '+' : '-' }}{{ transaction.amount | currency }}
+            {{ transaction.type === 'deposit' ? '+' : '-' }}{{ transaction.amount | currencyFormat }}
           </td>
           <td>
             Transaction #{{ transaction.id }}
@@ -56,13 +56,13 @@
       <tfoot>
         <tr class="table-light">
           <td colspan="2" class="text-end"><strong>Summary:</strong></td>
-          <td class="text-success">+{{ getTotalDeposits() | currency }}</td>
-          <td class="text-danger">-{{ getTotalWithdrawals() | currency }}</td>
+          <td class="text-success">+{{ getTotalDeposits() | currencyFormat }}</td>
+          <td class="text-danger">-{{ getTotalWithdrawals() | currencyFormat }}</td>
         </tr>
         <tr class="table-light">
           <td colspan="3" class="text-end"><strong>Net Transactions:</strong></td>
           <td [ngClass]="getNetTransactions() >= 0 ? 'text-success' : 'text-danger'">
-            <strong>{{ getNetTransactions() >= 0 ? '+' : '' }}{{ getNetTransactions() | currency }}</strong>
+            <strong>{{ getNetTransactions() >= 0 ? '+' : '' }}{{ getNetTransactions() | currencyFormat }}</strong>
           </td>
         </tr>
       </tfoot>
