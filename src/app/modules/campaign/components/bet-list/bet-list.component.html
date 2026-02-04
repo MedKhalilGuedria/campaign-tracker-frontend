@@ -38,7 +38,7 @@
           <td>
             <span class="badge bg-secondary">{{ bet.sport }}</span>
           </td>
-          <td>{{ bet.stake | currency }}</td>
+          <td>{{ bet.stake | currencyFormat }}</td>
           <td>
             <span class="badge bg-info">{{ bet.odds }}</span>
           </td>
@@ -48,7 +48,7 @@
             </span>
           </td>
           <td [ngClass]="bet.profit_loss >= 0 ? 'text-success' : 'text-danger'">
-            <strong>{{ bet.profit_loss >= 0 ? '+' : '' }}{{ bet.profit_loss | currency }}</strong>
+            <strong>{{ bet.profit_loss >= 0 ? '+' : '' }}{{ bet.profit_loss | currencyFormat }}</strong>
           </td>
           <td>
             <div class="btn-group btn-group-sm" *ngIf="bet.result === 'pending'">
@@ -68,7 +68,7 @@
       <tfoot>
         <tr class="table-light">
           <td colspan="2" class="text-end"><strong>Summary:</strong></td>
-          <td>{{ getTotalStake() | currency }}</td>
+          <td>{{ getTotalStake() | currencyFormat }}</td>
           <td>-</td>
           <td>
             <span class="badge bg-success me-1">{{ getWinCount() }}W</span>
@@ -76,7 +76,7 @@
             <span class="badge bg-warning">{{ getPendingCount() }}P</span>
           </td>
           <td [ngClass]="getTotalProfitLoss() >= 0 ? 'text-success' : 'text-danger'">
-            <strong>{{ getTotalProfitLoss() >= 0 ? '+' : '' }}{{ getTotalProfitLoss() | currency }}</strong>
+            <strong>{{ getTotalProfitLoss() >= 0 ? '+' : '' }}{{ getTotalProfitLoss() | currencyFormat }}</strong>
           </td>
           <td></td>
         </tr>
@@ -116,7 +116,7 @@
                 <span class="badge bg-warning">{{ sport.pending }}</span>
               </td>
               <td class="text-end" [ngClass]="sport.profit >= 0 ? 'text-success' : 'text-danger'">
-                {{ sport.profit >= 0 ? '+' : '' }}{{ sport.profit | currency }}
+                {{ sport.profit >= 0 ? '+' : '' }}{{ sport.profit | currencyFormat }}
               </td>
             </tr>
           </tbody>
