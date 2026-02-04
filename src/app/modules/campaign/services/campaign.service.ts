@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 export interface Campaign {
   id: number;
@@ -16,9 +17,11 @@ export interface Campaign {
   providedIn: 'root'
 })
 export class CampaignService {
-  private apiUrl = 'https://campaign-tracker-3-pn3v.onrender.com/campaigns';
 
-  constructor(private http: HttpClient) { }
+  // ✅ Base URL with /campaigns appended once
+  private apiUrl = `${environment.apiUrl}/campaigns`;
+
+  constructor(private http: HttpClient) {}
 
   getAll(): Observable<Campaign[]> {
     return this.http.get<Campaign[]>(this.apiUrl);

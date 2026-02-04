@@ -1,24 +1,82 @@
-<h3>Transactions</h3>
-<div *ngIf="transactions.length === 0" class="alert alert-info">
-  No transactions yet.
+<div class="transaction-list">
+  <!-- Loading State -->
+  <div *ngIf="allTransactions.length === 0 && filteredTransactions.length === 0" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2 text-muted">Loading transactions...</p>
+  </div>
+
+  <!-- No Transactions -->
+  <div *ngIf="allTransactions.length > 0 && filteredTransactions.length === 0" class="text-center py-5">
+    <i class="fas fa-exchange-alt fa-3x text-muted mb-3"></i>
+    <h5 class="text-muted">No transactions in selected period</h5>
+    <p class="text-muted">Try changing the date filter to see more transactions</p>
+  </div>
+
+  <!-- Transactions Table -->
+  <div *ngIf="filteredTransactions.length > 0" class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Date & Time</th>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let transaction of filteredTransactions">
+          <td>
+            {{ transaction.created_at | date:'shortDate' }}
+            <br>
+            <small class="text-muted">{{ transaction.created_at | date:'shortTime' }}</small>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="{
+              'bg-success': transaction.type === 'deposit',
+              'bg-danger': transaction.type === 'withdrawal'
+            }">
+              {{ transaction.type | titlecase }}
+            </span>
+          </td>
+          <td [ngClass]="{
+            'text-success': transaction.type === 'deposit',
+            'text-danger': transaction.type === 'withdrawal'
+          }">
+            {{ transaction.type === 'deposit' ? '+' : '-' }}{{ transaction.amount | currency }}
+          </td>
+          <td>
+            Transaction #{{ transaction.id }}
+            <br>
+            <small class="text-muted">Campaign ID: {{ transaction.campaign_id }}</small>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr class="table-light">
+          <td colspan="2" class="text-end"><strong>Summary:</strong></td>
+          <td class="text-success">+{{ getTotalDeposits() | currency }}</td>
+          <td class="text-danger">-{{ getTotalWithdrawals() | currency }}</td>
+        </tr>
+        <tr class="table-light">
+          <td colspan="3" class="text-end"><strong>Net Transactions:</strong></td>
+          <td [ngClass]="getNetTransactions() >= 0 ? 'text-success' : 'text-danger'">
+            <strong>{{ getNetTransactions() >= 0 ? '+' : '' }}{{ getNetTransactions() | currency }}</strong>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+    
+    <!-- Pagination Info -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <small class="text-muted">
+        Showing {{ filteredTransactions.length }} of {{ allTransactions.length }} total transactions
+      </small>
+      <small class="text-muted">
+        <i class="fas fa-filter me-1"></i>
+        Filtered by date
+      </small>
+    </div>
+  </div>
 </div>
-<table *ngIf="transactions.length > 0" class="table table-sm">
-  <thead>
-    <tr>
-      <th>Type</th>
-      <th>Amount</th>
-      <th>Date</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let t of transactions">
-      <td>
-        <span [ngClass]="{'badge badge-success': t.type === 'deposit', 'badge badge-danger': t.type === 'withdrawal'}">
-          {{ t.type | titlecase }}
-        </span>
-      </td>
-      <td>{{ t.amount | currencyFormat }}</td>
-      <td>{{ t.created_at | date:'short' }}</td>
-    </tr>
-  </tbody>
-</table>

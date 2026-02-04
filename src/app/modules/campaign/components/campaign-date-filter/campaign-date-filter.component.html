@@ -1,0 +1,124 @@
+<div class="campaign-date-filter card">
+  <div class="card-body p-3">
+    <div class="row align-items-center g-3">
+      <!-- Filter Description -->
+      <div class="col-md-3">
+        <div class="d-flex align-items-center">
+          <i class="fas fa-calendar-alt text-primary me-2"></i>
+          <div>
+            <div class="small text-muted">Viewing</div>
+            <div class="fw-bold">{{ getFilterDescription() }}</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick Select Buttons -->
+      <div class="col-md-6">
+        <div class="btn-group btn-group-sm" role="group">
+          <button type="button" class="btn btn-outline-primary" 
+                  (click)="quickSelect('allTime')"
+                  [class.active]="currentFilter.type === 'all'">
+            All Time
+          </button>
+          <button type="button" class="btn btn-outline-primary" 
+                  (click)="quickSelect('currentMonth')"
+                  [class.active]="currentFilter.type === 'month' && 
+                    currentFilter.month === getCurrentMonth()">
+            This Month
+          </button>
+          <button type="button" class="btn btn-outline-primary" 
+                  (click)="quickSelect('lastMonth')">
+            Last Month
+          </button>
+          <button type="button" class="btn btn-outline-primary" 
+                  (click)="quickSelect('last30Days')">
+            Last 30 Days
+          </button>
+          <button type="button" class="btn btn-outline-primary" 
+                  (click)="quickSelect('last90Days')">
+            Last 90 Days
+          </button>
+        </div>
+      </div>
+      
+      <!-- Filter Controls -->
+      <div class="col-md-3">
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary btn-sm w-100 dropdown-toggle" 
+                  type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-filter me-1"></i>
+            Filter Options
+          </button>
+          <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 300px;">
+            <!-- Filter Type -->
+            <div class="mb-3">
+              <label class="form-label small">Time Period</label>
+              <div class="btn-group w-100" role="group">
+                <button *ngFor="let type of filterTypes"
+                        type="button" 
+                        class="btn btn-sm"
+                        [class.btn-primary]="currentFilter.type === type.value"
+                        [class.btn-outline-primary]="currentFilter.type !== type.value"
+                        (click)="onFilterTypeChange(type.value)">
+                  <i [class]="type.icon" class="me-1"></i>
+                  {{ type.label }}
+                </button>
+              </div>
+            </div>
+            
+            <!-- Month Selection -->
+            <div *ngIf="currentFilter.type === 'month'" class="mb-3">
+              <div class="row g-2">
+                <div class="col-8">
+                  <label class="form-label small">Month</label>
+                  <select class="form-select form-select-sm" 
+                          [(ngModel)]="selectedMonth"
+                          (change)="onMonthChange()">
+                    <option *ngFor="let month of months" [value]="month.value">
+                      {{ month.label }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-4">
+                  <label class="form-label small">Year</label>
+                  <select class="form-select form-select-sm" 
+                          [(ngModel)]="selectedYear"
+                          (change)="onYearChange()">
+                    <option *ngFor="let year of years" [value]="year">
+                      {{ year }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Custom Date Range -->
+            <div *ngIf="currentFilter.type === 'custom'" class="mb-3">
+              <label class="form-label small">Date Range</label>
+              <div class="row g-2">
+                <div class="col-6">
+                  <input type="date" class="form-control form-control-sm" 
+                         [(ngModel)]="startDate"
+                         (change)="onDateRangeChange()">
+                </div>
+                <div class="col-6">
+                  <input type="date" class="form-control form-control-sm" 
+                         [(ngModel)]="endDate"
+                         (change)="onDateRangeChange()">
+                </div>
+              </div>
+            </div>
+            
+            <!-- Active Filter Badge -->
+            <div class="mt-2">
+              <span class="badge bg-primary">
+                <i class="fas fa-filter me-1"></i>
+                {{ currentFilter.type | titlecase }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

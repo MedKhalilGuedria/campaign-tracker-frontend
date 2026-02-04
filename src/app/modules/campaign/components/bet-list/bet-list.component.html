@@ -1,110 +1,138 @@
-<h4>
-  <i class="fas fa-trophy me-2"></i>
-  Betting History
-  <span class="badge bg-warning ms-2">{{ bets.length }}</span>
-</h4>
+<div class="bet-list">
+  <!-- Loading State -->
+  <div *ngIf="allBets.length === 0 && filteredBets.length === 0" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2 text-muted">Loading bets...</p>
+  </div>
 
-<div *ngIf="bets.length === 0" class="alert alert-info">
-  <i class="fas fa-info-circle me-2"></i>
-  No bets placed yet. Place your first bet using the form above.
-</div>
+  <!-- No Bets -->
+  <div *ngIf="allBets.length > 0 && filteredBets.length === 0" class="text-center py-5">
+    <i class="fas fa-dice fa-3x text-muted mb-3"></i>
+    <h5 class="text-muted">No bets in selected period</h5>
+    <p class="text-muted">Try changing the date filter to see more bets</p>
+  </div>
 
-<div *ngIf="bets.length > 0" class="table-responsive">
-  <table class="table table-hover">
-    <thead class="table-light">
-      <tr>
-        <th>Sport</th>
-        <th>Stake</th>
-        <th>Odds</th>
-        <th>Potential Win</th>
-        <th>Result</th>
-        <th>Profit/Loss</th>
-        <th>Date</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let bet of bets">
-        <td>
-          <i class="fas fa-futbol me-1 text-muted"></i>
-          {{ bet.sport }}
-        </td>
-        <td>
-          <strong>{{ bet.stake | currencyFormat }}</strong>
-        </td>
-        <td>
-          <span class="badge bg-secondary">{{ bet.odds }}</span>
-        </td>
-        <td>
-          <span class="text-success">
-            {{ (bet.stake * bet.odds) | currencyFormat }}
-          </span>
-        </td>
-        <td>
-          <span class="badge" 
-                [ngClass]="{
-                  'bg-success': bet.result === 'win',
-                  'bg-danger': bet.result === 'loss',
-                  'bg-warning': bet.result === 'pending'
-                }">
-            {{ bet.result | titlecase }}
-          </span>
-        </td>
-        <td>
-          <span [ngClass]="{
-            'text-success': bet.profit_loss > 0,
-            'text-danger': bet.profit_loss < 0,
-            'text-muted': bet.profit_loss === 0
-          }">
-            {{ bet.profit_loss | currencyFormat }}
-          </span>
-        </td>
-        <td>
-          <small class="text-muted">
-            {{ bet.created_at | date:'short' }}
-          </small>
-        </td>
-        <td>
-          <app-bet-result 
-            [bet]="bet"
-            (resultUpdated)="onResultUpdated($event)">
-          </app-bet-result>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-<!-- Stats Summary -->
-<div class="row mt-4" *ngIf="bets.length > 0">
-  <div class="col-md-4">
-    <div class="card">
-      <div class="card-body text-center">
-        <h5 class="card-title text-success">
-          {{ getWinCount() }}
-        </h5>
-        <p class="card-text text-muted">Wins</p>
+  <!-- Bets Table -->
+  <div *ngIf="filteredBets.length > 0" class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Sport</th>
+          <th>Stake</th>
+          <th>Odds</th>
+          <th>Result</th>
+          <th>Profit/Loss</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let bet of filteredBets" [ngClass]="getBetRowClass(bet)">
+          <td>
+            {{ bet.created_at | date:'shortDate' }}
+            <br>
+            <small class="text-muted">{{ bet.created_at | date:'shortTime' }}</small>
+          </td>
+          <td>
+            <span class="badge bg-secondary">{{ bet.sport }}</span>
+          </td>
+          <td>{{ bet.stake | currency }}</td>
+          <td>
+            <span class="badge bg-info">{{ bet.odds }}</span>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="getBetResultClass(bet)">
+              {{ bet.result | titlecase }}
+            </span>
+          </td>
+          <td [ngClass]="bet.profit_loss >= 0 ? 'text-success' : 'text-danger'">
+            <strong>{{ bet.profit_loss >= 0 ? '+' : '' }}{{ bet.profit_loss | currency }}</strong>
+          </td>
+          <td>
+            <div class="btn-group btn-group-sm" *ngIf="bet.result === 'pending'">
+              <button class="btn btn-success" (click)="markAsWin(bet)">
+                <i class="fas fa-check"></i> Win
+              </button>
+              <button class="btn btn-danger" (click)="markAsLoss(bet)">
+                <i class="fas fa-times"></i> Loss
+              </button>
+            </div>
+            <span *ngIf="bet.result !== 'pending'" class="text-muted small">
+              Settled
+            </span>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr class="table-light">
+          <td colspan="2" class="text-end"><strong>Summary:</strong></td>
+          <td>{{ getTotalStake() | currency }}</td>
+          <td>-</td>
+          <td>
+            <span class="badge bg-success me-1">{{ getWinCount() }}W</span>
+            <span class="badge bg-danger me-1">{{ getLossCount() }}L</span>
+            <span class="badge bg-warning">{{ getPendingCount() }}P</span>
+          </td>
+          <td [ngClass]="getTotalProfitLoss() >= 0 ? 'text-success' : 'text-danger'">
+            <strong>{{ getTotalProfitLoss() >= 0 ? '+' : '' }}{{ getTotalProfitLoss() | currency }}</strong>
+          </td>
+          <td></td>
+        </tr>
+        <tr class="table-light">
+          <td colspan="4" class="text-end"><strong>Performance:</strong></td>
+          <td>Win Rate: {{ getWinRate() | number:'1.1-1' }}%</td>
+          <td>ROI: {{ getROI() | number:'1.1-1' }}%</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+    
+    <!-- Performance by Sport -->
+    <div *ngIf="getPerformanceBySport().length > 0" class="mt-4">
+      <h6 class="mb-3">Performance by Sport</h6>
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Sport</th>
+              <th class="text-center">Wins</th>
+              <th class="text-center">Losses</th>
+              <th class="text-center">Pending</th>
+              <th class="text-end">Profit/Loss</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let sport of getPerformanceBySport()">
+              <td>{{ sport.sport }}</td>
+              <td class="text-center">
+                <span class="badge bg-success">{{ sport.wins }}</span>
+              </td>
+              <td class="text-center">
+                <span class="badge bg-danger">{{ sport.losses }}</span>
+              </td>
+              <td class="text-center">
+                <span class="badge bg-warning">{{ sport.pending }}</span>
+              </td>
+              <td class="text-end" [ngClass]="sport.profit >= 0 ? 'text-success' : 'text-danger'">
+                {{ sport.profit >= 0 ? '+' : '' }}{{ sport.profit | currency }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card">
-      <div class="card-body text-center">
-        <h5 class="card-title text-danger">
-          {{ getLossCount() }}
-        </h5>
-        <p class="card-text text-muted">Losses</p>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card">
-      <div class="card-body text-center">
-        <h5 class="card-title text-warning">
-          {{ getPendingCount() }}
-        </h5>
-        <p class="card-text text-muted">Pending</p>
-      </div>
+    
+    <!-- Pagination Info -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <small class="text-muted">
+        Showing {{ filteredBets.length }} of {{ allBets.length }} total bets
+      </small>
+      <small class="text-muted">
+        <i class="fas fa-filter me-1"></i>
+        Filtered by date
+      </small>
     </div>
   </div>
 </div>

@@ -6,10 +6,11 @@ import { FormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CampaignModule } from './modules/campaign/campaign.module';
+import { CampaignDateFilterComponent } from './modules/campaign/components/campaign-date-filter/campaign-date-filter.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
   ],
   imports: [
     BrowserModule,

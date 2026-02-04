@@ -1,248 +1,237 @@
-<div class="card mb-4" *ngIf="campaign">
-  <div class="card-header">
-    <h5 class="mb-0">
-      <i class="fas fa-chart-line me-2 text-primary"></i>
-      Campaign Performance Analytics
-    </h5>
-  </div>
-  
-  <div class="card-body">
-    <!-- Stats Summary -->
-    <div class="row mb-4">
-      <div class="col-md-3 col-6">
-        <div class="stats-card text-center">
-          <div class="stat-value" [ngClass]="{
-            'text-success': campaign.current_balance >= campaign.start_balance,
-            'text-danger': campaign.current_balance < campaign.start_balance
-          }">
-            {{ campaign.current_balance | currencyFormat }}
-          </div>
-          <div class="stat-label">Current Balance</div>
+<div class="balance-chart">
+  <div class="row">
+    <!-- Balance Timeline Chart -->
+    <div class="col-lg-8 mb-4">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="mb-0">Balance Timeline</h5>
+          <small class="text-muted">Showing data for selected period</small>
         </div>
-      </div>
-      <div class="col-md-3 col-6">
-        <div class="stats-card text-center">
-          <div class="stat-value text-info">
-            {{ performanceStats.winRate }}%
-          </div>
-          <div class="stat-label">Win Rate</div>
-        </div>
-      </div>
-      <div class="col-md-3 col-6">
-        <div class="stats-card text-center">
-          <div class="stat-value" [ngClass]="{
-            'text-success': performanceStats.totalProfit > 0,
-            'text-danger': performanceStats.totalProfit < 0
-          }">
-            {{ performanceStats.totalProfit | currencyFormat }}
-          </div>
-          <div class="stat-label">Total P/L</div>
-        </div>
-      </div>
-      <div class="col-md-3 col-6">
-        <div class="stats-card text-center">
-          <div class="stat-value text-warning">
-            {{ performanceStats.totalBets }}
-          </div>
-          <div class="stat-label">Total Bets</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Chart Row -->
-    <div class="row">
-      <!-- Balance Timeline Chart -->
-      <div class="col-lg-8">
-        <div class="card">
-          <div class="card-header">
-            <h6 class="mb-0">
-              <i class="fas fa-wave-square me-2"></i>
-              Balance Timeline
-              <small class="text-muted ms-2">
-                (T=Transaction, B=Bet)
-              </small>
-            </h6>
-          </div>
-          <div class="card-body">
-            <div style="position: relative; height: 300px;">
-              <canvas baseChart
-                [data]="lineChartData"
-                [options]="lineChartOptions"
-                [type]="'line'">
-              </canvas>
-            </div>
-            <div class="chart-legend mt-3">
-              <div class="row">
-                <div class="col-md-6">
-                  <span class="legend-item">
-                    <span class="legend-color" style="background-color: #3498db;"></span>
-                    Balance Progress
-                  </span>
-                </div>
-                <div class="col-md-6 text-end">
-                  <small class="text-muted">
-                    Start: {{ campaign.start_balance | currencyFormat }} 
-                    | Current: {{ campaign.current_balance | currencyFormat }}
-                  </small>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Performance Doughnut Chart -->
-      <div class="col-lg-4">
-        <div class="card">
-          <div class="card-header">
-            <h6 class="mb-0">
-              <i class="fas fa-chart-pie me-2"></i>
-              Bet Performance
-            </h6>
-          </div>
-          <div class="card-body">
-            <div style="position: relative; height: 250px;">
-              <canvas baseChart
-                [data]="doughnutChartData"
-                [options]="doughnutChartOptions"
-                [type]="doughnutChartType">
-              </canvas>
-            </div>
-            <div class="performance-stats mt-3">
-              <div class="d-flex justify-content-between mb-2">
-                <span>Total Bets:</span>
-                <strong>{{ performanceStats.totalBets }}</strong>
-              </div>
-              <div class="d-flex justify-content-between mb-2">
-                <span>Total Staked:</span>
-                <strong>{{ performanceStats.totalStaked | currencyFormat }}</strong>
-              </div>
-              <div class="d-flex justify-content-between mb-2">
-                <span>Average Odds:</span>
-                <strong>{{ performanceStats.avgOdds }}</strong>
-              </div>
-              <div class="d-flex justify-content-between">
-                <span>Profit/Loss:</span>
-                <strong [ngClass]="{
-                  'text-success': performanceStats.totalProfit > 0,
-                  'text-danger': performanceStats.totalProfit < 0
-                }">
-                  {{ performanceStats.totalProfit | currencyFormat }}
-                </strong>
-              </div>
-            </div>
+        <div class="card-body">
+          <div class="chart-container" style="position: relative; height: 300px;">
+            <canvas baseChart
+                    [data]="lineChartData"
+                    [options]="lineChartOptions"
+                    [type]="'line'">
+            </canvas>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Detailed Stats -->
-    <div class="row mt-4">
-      <!-- Transaction Stats -->
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-header">
-            <h6 class="mb-0">
-              <i class="fas fa-exchange-alt me-2 text-success"></i>
-              Transaction Statistics
-            </h6>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-6">
-                <div class="mb-3">
-                  <small class="text-muted d-block">Total Deposits</small>
-                  <strong class="text-success">
-                    {{ transactionStats.totalDeposits | currencyFormat }}
-                  </strong>
-                  <small class="d-block text-muted">
-                    ({{ transactionStats.depositCount }} transactions)
-                  </small>
-                </div>
-                <div>
-                  <small class="text-muted d-block">Largest Deposit</small>
-                  <strong>{{ transactionStats.largestDeposit | currencyFormat }}</strong>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="mb-3">
-                  <small class="text-muted d-block">Total Withdrawals</small>
-                  <strong class="text-danger">
-                    {{ transactionStats.totalWithdrawals | currencyFormat }}
-                  </strong>
-                  <small class="d-block text-muted">
-                    ({{ transactionStats.withdrawalCount }} transactions)
-                  </small>
-                </div>
-                <div>
-                  <small class="text-muted d-block">Largest Withdrawal</small>
-                  <strong>{{ transactionStats.largestWithdrawal | currencyFormat }}</strong>
-                </div>
-              </div>
-            </div>
-          </div>
+    <!-- Performance Chart -->
+    <div class="col-lg-4 mb-4">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="mb-0">Bet Performance</h5>
+          <small class="text-muted">Win/Loss Distribution</small>
         </div>
-      </div>
-
-      <!-- Bet Stats -->
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-header">
-            <h6 class="mb-0">
-              <i class="fas fa-trophy me-2 text-warning"></i>
-              Betting Statistics
-            </h6>
+        <div class="card-body">
+          <div class="chart-container" style="position: relative; height: 250px;">
+            <canvas baseChart
+                    [data]="doughnutChartData"
+                    [options]="doughnutChartOptions"
+                    [type]="doughnutChartType">
+            </canvas>
           </div>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-6">
-                <div class="mb-3">
-                  <small class="text-muted d-block">Wins</small>
-                  <strong class="text-success">{{ performanceStats.wins }}</strong>
-                </div>
-                <div>
-                  <small class="text-muted d-block">Losses</small>
-                  <strong class="text-danger">{{ performanceStats.losses }}</strong>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="mb-3">
-                  <small class="text-muted d-block">Pending</small>
-                  <strong class="text-warning">{{ performanceStats.pending }}</strong>
-                </div>
-                <div>
-                  <small class="text-muted d-block">Win Rate</small>
-                  <strong>{{ performanceStats.winRate }}%</strong>
-                </div>
-              </div>
+          
+          <!-- Performance Stats -->
+          <div class="row mt-3 text-center">
+            <div class="col-4">
+              <div class="text-success small">Wins</div>
+              <div class="h5">{{ performanceStats.wins }}</div>
             </div>
-            <div class="progress mt-2" style="height: 8px;">
-              <div class="progress-bar bg-success" 
-                   [style.width.%]="performanceStats.totalBets > 0 ? 
-                   (performanceStats.wins / performanceStats.totalBets) * 100 : 0">
-              </div>
-              <div class="progress-bar bg-danger" 
-                   [style.width.%]="performanceStats.totalBets > 0 ? 
-                   (performanceStats.losses / performanceStats.totalBets) * 100 : 0">
-              </div>
-              <div class="progress-bar bg-warning" 
-                   [style.width.%]="performanceStats.totalBets > 0 ? 
-                   (performanceStats.pending / performanceStats.totalBets) * 100 : 0">
-              </div>
+            <div class="col-4">
+              <div class="text-danger small">Losses</div>
+              <div class="h5">{{ performanceStats.losses }}</div>
+            </div>
+            <div class="col-4">
+              <div class="text-warning small">Pending</div>
+              <div class="h5">{{ performanceStats.pending }}</div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Loading State -->
-<div class="card mb-4" *ngIf="!campaign">
-  <div class="card-body text-center py-5">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading charts...</span>
+  <!-- Daily Profit/Loss Chart -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Daily Profit/Loss</h5>
+          <small class="text-muted">Daily betting performance</small>
+        </div>
+        <div class="card-body">
+          <div class="chart-container" style="position: relative; height: 250px;">
+            <canvas baseChart
+                    [data]="barChartData"
+                    [options]="barChartOptions"
+                    [type]="'bar'">
+            </canvas>
+          </div>
+        </div>
+      </div>
     </div>
-    <p class="mt-3 text-muted">Loading campaign data...</p>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="row">
+    <!-- Betting Stats -->
+    <div class="col-md-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="mb-0">Betting Statistics</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-6 mb-3">
+              <div class="text-muted small">Total Bets</div>
+              <div class="h4">{{ performanceStats.totalBets }}</div>
+            </div>
+            <div class="col-6 mb-3">
+              <div class="text-muted small">Win Rate</div>
+              <div class="h4" [ngClass]="performanceStats.winRate >= 50 ? 'text-success' : 'text-warning'">
+                {{ performanceStats.winRate }}%
+              </div>
+            </div>
+            <div class="col-6 mb-3">
+              <div class="text-muted small">Total Staked</div>
+              <div class="h4">{{ performanceStats.totalStaked | currency }}</div>
+            </div>
+            <div class="col-6 mb-3">
+              <div class="text-muted small">Total Profit/Loss</div>
+              <div class="h4" [ngClass]="performanceStats.totalProfit >= 0 ? 'text-success' : 'text-danger'">
+                {{ performanceStats.totalProfit >= 0 ? '+' : '' }}{{ performanceStats.totalProfit | currency }}
+              </div>
+            </div>
+            <div class="col-6 mb-3">
+              <div class="text-muted small">Average Odds</div>
+              <div class="h4">{{ performanceStats.avgOdds }}</div>
+            </div>
+            <div class="col-6 mb-3">
+              <div class="text-muted small">ROI</div>
+              <div class="h4" [ngClass]="performanceStats.totalProfit >= 0 ? 'text-success' : 'text-danger'">
+                {{ performanceStats.totalStaked > 0 ? 
+                  ((performanceStats.totalProfit / performanceStats.totalStaked) * 100 | number:'1.1-1') : 0 }}%
+              </div>
+            </div>
+          </div>
+          
+          <!-- Best/Worst Day -->
+          <div class="row mt-3">
+            <div class="col-6">
+              <div class="card border-success">
+                <div class="card-body text-center p-2">
+                  <div class="text-success small">Best Day</div>
+                  <div class="h6 mb-1" *ngIf="performanceStats.bestDay.date">
+                    {{ performanceStats.bestDay.date | date:'shortDate' }}
+                  </div>
+                  <div class="h6 mb-1 text-muted" *ngIf="!performanceStats.bestDay.date">
+                    -
+                  </div>
+                  <div class="text-success">
+                    +{{ performanceStats.bestDay.profit | currency }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="card border-danger">
+                <div class="card-body text-center p-2">
+                  <div class="text-danger small">Worst Day</div>
+                  <div class="h6 mb-1" *ngIf="performanceStats.worstDay.date">
+                    {{ performanceStats.worstDay.date | date:'shortDate' }}
+                  </div>
+                  <div class="h6 mb-1 text-muted" *ngIf="!performanceStats.worstDay.date">
+                    -
+                  </div>
+                  <div class="text-danger">
+                    {{ performanceStats.worstDay.profit | currency }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transaction Stats -->
+    <div class="col-md-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="mb-0">Transaction Statistics</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-6 mb-3">
+              <div class="text-muted small">Total Deposits</div>
+              <div class="h4 text-success">{{ transactionStats.totalDeposits | currency }}</div>
+            </div>
+            <div class="col-6 mb-3">
+              <div class="text-muted small">Total Withdrawals</div>
+              <div class="h4 text-danger">{{ transactionStats.totalWithdrawals | currency }}</div>
+            </div>
+            <div class="col-6 mb-3">
+              <div class="text-muted small">Net Transactions</div>
+              <div class="h4" [ngClass]="(transactionStats.totalDeposits - transactionStats.totalWithdrawals) >= 0 ? 'text-success' : 'text-danger'">
+                {{ (transactionStats.totalDeposits - transactionStats.totalWithdrawals) >= 0 ? '+' : '' }}
+                {{ transactionStats.totalDeposits - transactionStats.totalWithdrawals | currency }}
+              </div>
+            </div>
+            <div class="col-6 mb-3">
+              <div class="text-muted small">Transaction Count</div>
+              <div class="h4">{{ transactionStats.depositCount + transactionStats.withdrawalCount }}</div>
+            </div>
+            <div class="col-6 mb-3">
+              <div class="text-muted small">Largest Deposit</div>
+              <div class="h4 text-success">{{ transactionStats.largestDeposit | currency }}</div>
+            </div>
+            <div class="col-6 mb-3">
+              <div class="text-muted small">Largest Withdrawal</div>
+              <div class="h4 text-danger">{{ transactionStats.largestWithdrawal | currency }}</div>
+            </div>
+          </div>
+          
+          <!-- Best/Worst Day -->
+          <div class="row mt-3">
+            <div class="col-6">
+              <div class="card border-success">
+                <div class="card-body text-center p-2">
+                  <div class="text-success small">Best Day</div>
+                  <div class="h6 mb-1" *ngIf="transactionStats.bestDay.date">
+                    {{ transactionStats.bestDay.date | date:'shortDate' }}
+                  </div>
+                  <div class="h6 mb-1 text-muted" *ngIf="!transactionStats.bestDay.date">
+                    -
+                  </div>
+                  <div class="text-success">
+                    +{{ transactionStats.bestDay.net | currency }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="card border-danger">
+                <div class="card-body text-center p-2">
+                  <div class="text-danger small">Worst Day</div>
+                  <div class="h6 mb-1" *ngIf="transactionStats.worstDay.date">
+                    {{ transactionStats.worstDay.date | date:'shortDate' }}
+                  </div>
+                  <div class="h6 mb-1 text-muted" *ngIf="!transactionStats.worstDay.date">
+                    -
+                  </div>
+                  <div class="text-danger">
+                    {{ transactionStats.worstDay.net | currency }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

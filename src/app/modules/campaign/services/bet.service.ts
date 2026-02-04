@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 export interface Bet {
   id: number;
@@ -17,21 +18,21 @@ export interface CreateBetData {
   campaign_id: number;
   sport: string;
   odds: number;
-  stake?: number | null;  // Allow both null and undefined
+  stake?: number | null;
 }
 
 export interface UpdateBetData {
   result: string;
-  profit_loss: number;
+  profit_loss?: number;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class BetService {
-  private apiUrl = 'https://campaign-tracker-3-pn3v.onrender.com/bets';
+  private apiUrl = `${environment.apiUrl}/bets`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getByCampaign(campaignId: number): Observable<Bet[]> {
     return this.http.get<Bet[]>(`${this.apiUrl}/campaign/${campaignId}`);
@@ -41,15 +42,18 @@ export class BetService {
     return this.http.post<Bet>(this.apiUrl, data);
   }
 
-  // Update bet result with explicit parameters
-  updateResult(betId: number, result: string, profitLoss: number = 0): Observable<Bet> {
-    return this.http.patch<Bet>(`${this.apiUrl}/${betId}`, {
-      result,
-      profit_loss: profitLoss
-    });
+  updateResult(betId: number, result: string, profitLoss?: number): Observable<Bet> {
+    const data: UpdateBetData = { result };
+    if (profitLoss !== undefined) {
+      data.profit_loss = profitLoss;
+    }
+    return this.http.patch<Bet>(`${this.apiUrl}/${betId}`, data);
   }
 
-  // Alternative update method using UpdateBetData interface
+  settleBet(betId: number, result: 'win' | 'loss'): Observable<Bet> {
+    return this.http.patch<Bet>(`${this.apiUrl}/${betId}/settle?result=${result}`, {});
+  }
+
   updateBet(betId: number, data: UpdateBetData): Observable<Bet> {
     return this.http.patch<Bet>(`${this.apiUrl}/${betId}`, data);
   }
