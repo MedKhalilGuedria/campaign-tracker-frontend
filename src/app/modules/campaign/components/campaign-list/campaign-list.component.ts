@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { CampaignService, Campaign } from '../../services/campaign.service';
-import { BetService, Bet } from '../../services/bet.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ChartConfiguration } from 'chart.js';
+import { CampaignService, Campaign } from '../../services/campaign.service';
+import { BetService, Bet } from '../../services/bet.service';
 import { CurrencyService } from '../../services/currency.service';
 
 interface CampaignStats {
@@ -18,122 +18,10 @@ interface CampaignStats {
   styleUrls: ['./campaign-list.component.scss']
 })
 export class CampaignListComponent implements OnInit {
-  public profitLossChartData: ChartConfiguration<'line'>['data'] = {
-  labels: [],
-  datasets: []
-};
-
-public profitLossChartOptions: ChartConfiguration<'line'>['options'] = {
-  responsive: true,
-  maintainAspectRatio: false,
-  scales: {
-    x: {
-      title: {
-        display: true,
-        text: 'Date'
-      },
-      ticks: {
-        maxTicksLimit: 10
-      }
-    },
-    y: {
-      beginAtZero: true,
-      title: {
-        display: true,
-        text: 'Profit/Loss'
-      },
-      ticks: {
-        callback: (value) => {
-          if (typeof value === 'string') {
-            const num = parseFloat(value);
-            return isNaN(num) ? '0' : `${num >= 0 ? '+' : ''}${this.currencyService.formatCurrency(num)}`;
-          }
-          if (typeof value === 'number') {
-            return `${value >= 0 ? '+' : ''}${this.currencyService.formatCurrency(value)}`;
-          }
-          return '0';
-        }
-      }
-    }
-  },
-  plugins: {
-    legend: {
-      display: true,
-      position: 'top'
-    },
-    tooltip: {
-      callbacks: {
-        label: (context) => {
-          const value = context.parsed.y;
-          if (value === null || value === undefined) return 'Profit/Loss: 0';
-          const formatted = this.currencyService.formatCurrency(value);
-          return `Profit/Loss: ${value >= 0 ? '+' : ''}${formatted}`;
-        }
-      }
-    }
-  }
-};
-
-// Add this method to calculate profit/loss over time
-updateProfitLossChart(): void {
-  if (this.filteredBets.length === 0) return;
-  
-  // Group bets by date and calculate cumulative profit/loss
-  const betsByDate: { [key: string]: number } = {};
-  
-  // First, sort bets by date
-  const sortedBets = [...this.filteredBets].sort((a, b) => 
-    new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-  );
-  
-  // Calculate cumulative profit/loss
-  let cumulativeProfitLoss = 0;
-  const dates: string[] = [];
-  const cumulativeData: number[] = [];
-  
-  sortedBets.forEach(bet => {
-    const date = new Date(bet.created_at);
-    const dateStr = date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric' 
-    });
-    
-    cumulativeProfitLoss += bet.profit_loss || 0;
-    
-    dates.push(dateStr);
-    cumulativeData.push(cumulativeProfitLoss);
-  });
-  
-  // Also add daily profit/loss
-  const dailyData: number[] = sortedBets.map(bet => bet.profit_loss || 0);
-  
-  this.profitLossChartData = {
-    labels: dates,
-    datasets: [
-      {
-        label: 'Cumulative Profit/Loss',
-        data: cumulativeData,
-        borderColor: '#3498db',
-        backgroundColor: 'rgba(52, 152, 219, 0.1)',
-        fill: true,
-        tension: 0.4,
-        borderWidth: 3
-      },
-      {
-        label: 'Daily Profit/Loss',
-        data: dailyData,
-        borderColor: '#e74c3c',
-        backgroundColor: 'rgba(231, 76, 60, 0.1)',
-        borderWidth: 2,
-        borderDash: [5, 5],
-        fill: false
-      }
-    ]
-  };
-}
   campaigns: Campaign[] = [];
   allBets: Bet[] = [];
   filteredBets: Bet[] = [];
+  displayedBets: Bet[] = [];
   stats: CampaignStats = {
     totalProfitLoss: 0,
     totalStaked: 0,
@@ -159,6 +47,70 @@ updateProfitLossChart(): void {
   showDatePicker = false;
   selectedStartDate: Date | null = null;
   selectedEndDate: Date | null = null;
+  
+  // Mobile view properties
+  isLoadingMore = false;
+  hasMoreBets = false;
+  mobilePageSize = 10;
+  mobileCurrentPage = 1;
+  activeResultFilter = 'all';
+  
+  // Chart properties
+  public profitLossChartData: ChartConfiguration<'line'>['data'] = {
+    labels: [],
+    datasets: []
+  };
+
+  public profitLossChartOptions: ChartConfiguration<'line'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Date'
+        },
+        ticks: {
+          maxTicksLimit: 10
+        }
+      },
+      y: {
+        beginAtZero: false,
+        title: {
+          display: true,
+          text: 'Profit/Loss'
+        },
+        ticks: {
+          callback: (value) => {
+            if (typeof value === 'string') {
+              const num = parseFloat(value);
+              return isNaN(num) ? '0' : `${num >= 0 ? '+' : ''}${this.currencyService.formatCurrency(num)}`;
+            }
+            if (typeof value === 'number') {
+              return `${value >= 0 ? '+' : ''}${this.currencyService.formatCurrency(value)}`;
+            }
+            return '0';
+          }
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top'
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const value = context.parsed.y;
+            if (value === null || value === undefined) return 'Profit/Loss: 0';
+            const formatted = this.currencyService.formatCurrency(value);
+            return `Profit/Loss: ${value >= 0 ? '+' : ''}${formatted}`;
+          }
+        }
+      }
+    }
+  };
 
   constructor(
     private campaignService: CampaignService,
@@ -176,7 +128,6 @@ updateProfitLossChart(): void {
     this.loadCampaigns();
     this.loadAllBets();
     
-    // Watch for filter changes
     this.filterForm.valueChanges.subscribe(() => {
       this.applyFilters();
     });
@@ -190,77 +141,76 @@ updateProfitLossChart(): void {
   }
 
   loadAllBets(): void {
-    // Assuming you have a method to get all bets across campaigns
-    this.betService.getAllBets().subscribe(bets => {
+    this.betService.getAllBets().subscribe((bets: Bet[]) => {
       this.allBets = bets;
       this.applyFilters();
     });
   }
 
-  getCampaignName(campaignId: number): string {
-  const campaign = this.campaigns.find(c => c.id === campaignId);
-  return campaign ? campaign.name : 'Unknown Campaign';
-}
-
   applyFilters(): void {
-  let filtered = [...this.allBets];
-  const timeFilter = this.filterForm.get('timeFilter')?.value || 'all';
-  const nameFilter = this.filterForm.get('nameFilter')?.value || 'all';
+    let filtered = [...this.allBets];
+    const timeFilter = this.filterForm.get('timeFilter')?.value || 'all';
+    const nameFilter = this.filterForm.get('nameFilter')?.value || 'all';
 
-  // Apply time filter
-  if (timeFilter !== 'all') {
-    if (timeFilter === 'custom') {
-      // Custom date range
-      const startDate = this.selectedStartDate;
-      const endDate = this.selectedEndDate;
-      
-      if (startDate) {
-        filtered = filtered.filter(bet => 
-          new Date(bet.created_at) >= startDate
-        );
-      }
-      if (endDate) {
-        filtered = filtered.filter(bet => 
-          new Date(bet.created_at) <= endDate
-        );
-      }
-    } else {
-      // Predefined ranges
-      const days = parseInt(timeFilter);
-      if (!isNaN(days)) {
-        const startDate = new Date();
-        startDate.setDate(startDate.getDate() - days);
+    // Apply time filter
+    if (timeFilter !== 'all') {
+      if (timeFilter === 'custom') {
+        const startDate = this.selectedStartDate;
+        const endDate = this.selectedEndDate;
         
-        filtered = filtered.filter(bet => 
-          new Date(bet.created_at) >= startDate
-        );
+        if (startDate) {
+          filtered = filtered.filter(bet => 
+            new Date(bet.created_at) >= startDate
+          );
+        }
+        if (endDate) {
+          filtered = filtered.filter(bet => 
+            new Date(bet.created_at) <= endDate
+          );
+        }
+      } else {
+        const days = parseInt(timeFilter);
+        if (!isNaN(days)) {
+          const startDate = new Date();
+          startDate.setDate(startDate.getDate() - days);
+          
+          filtered = filtered.filter(bet => 
+            new Date(bet.created_at) >= startDate
+          );
+        }
       }
     }
-  }
 
-  // Apply name filter
-  if (nameFilter !== 'all') {
-    const campaignNames = this.campaigns.map(c => ({
-      id: c.id,
-      name: c.name.toLowerCase()
-    }));
-    
-    filtered = filtered.filter(bet => {
-      const campaign = campaignNames.find(c => c.id === bet.campaign_id);
-      if (!campaign) return false;
+    // Apply name filter
+    if (nameFilter !== 'all') {
+      const campaignNames = this.campaigns.map(c => ({
+        id: c.id,
+        name: c.name.toLowerCase()
+      }));
       
-      const containsCampaign = campaign.name.includes('campaign');
-      return nameFilter === 'contains' ? containsCampaign : !containsCampaign;
-    });
-  }
+      filtered = filtered.filter(bet => {
+        const campaign = campaignNames.find(c => c.id === bet.campaign_id);
+        if (!campaign) return false;
+        
+        const containsCampaign = campaign.name.includes('campaign');
+        return nameFilter === 'contains' ? containsCampaign : !containsCampaign;
+      });
+    }
 
-  this.filteredBets = filtered;
-  this.calculateStats();
-  this.updateProfitLossChart(); // Add this line
-}
+    // Apply result filter for mobile
+    if (this.activeResultFilter !== 'all') {
+      filtered = filtered.filter(bet => bet.result === this.activeResultFilter);
+    }
+
+    this.filteredBets = filtered;
+    this.mobileCurrentPage = 1;
+    this.updateDisplayedBets();
+    this.calculateStats();
+    this.updateProfitLossChart();
+  }
 
   calculateStats(): void {
-    const allBets = this.filteredBets.length > 0 ? this.filteredBets : this.allBets;
+    const allBets = this.filteredBets;
     
     const totalProfitLoss = allBets.reduce((sum, bet) => sum + (bet.profit_loss || 0), 0);
     const totalStaked = allBets.reduce((sum, bet) => sum + (bet.stake || 0), 0);
@@ -276,13 +226,125 @@ updateProfitLossChart(): void {
     };
   }
 
-  setCustomDateRange(): void {
-    this.showDatePicker = false;
-    this.filterForm.get('timeFilter')?.setValue('custom');
+  updateProfitLossChart(): void {
+    if (this.filteredBets.length === 0) return;
+    
+    const sortedBets = [...this.filteredBets].sort((a, b) => 
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+    
+    let cumulativeProfitLoss = 0;
+    const dates: string[] = [];
+    const cumulativeData: number[] = [];
+    
+    sortedBets.forEach(bet => {
+      const date = new Date(bet.created_at);
+      const dateStr = date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric' 
+      });
+      
+      cumulativeProfitLoss += bet.profit_loss || 0;
+      
+      dates.push(dateStr);
+      cumulativeData.push(cumulativeProfitLoss);
+    });
+    
+    const dailyData: number[] = sortedBets.map(bet => bet.profit_loss || 0);
+    
+    this.profitLossChartData = {
+      labels: dates,
+      datasets: [
+        {
+          label: 'Cumulative Profit/Loss',
+          data: cumulativeData,
+          borderColor: '#3498db',
+          backgroundColor: 'rgba(52, 152, 219, 0.1)',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 3
+        },
+        {
+          label: 'Daily Profit/Loss',
+          data: dailyData,
+          borderColor: '#e74c3c',
+          backgroundColor: 'rgba(231, 76, 60, 0.1)',
+          borderWidth: 2,
+          borderDash: [5, 5],
+          fill: false
+        }
+      ]
+    };
+  }
+
+  onDateChange(): void {
+    if (this.selectedStartDate) {
+      this.filterForm.get('timeFilter')?.setValue('custom');
+      this.applyFilters();
+    }
+  }
+
+  // Mobile View Methods
+  filterByResult(result: string): void {
+    this.activeResultFilter = result;
     this.applyFilters();
   }
 
-  // Helper methods for statistics (keeping existing ones)
+  sortByDate(): void {
+    this.filteredBets.sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    this.updateDisplayedBets();
+  }
+
+  sortByProfit(): void {
+    this.filteredBets.sort((a, b) => b.profit_loss - a.profit_loss);
+    this.updateDisplayedBets();
+  }
+
+  sortByStake(): void {
+    this.filteredBets.sort((a, b) => b.stake - a.stake);
+    this.updateDisplayedBets();
+  }
+
+  getCampaignName(campaignId: number): string {
+    const campaign = this.campaigns.find(c => c.id === campaignId);
+    return campaign ? campaign.name : 'Unknown Campaign';
+  }
+
+  getCampaignInitial(campaignId: number): string {
+    const campaign = this.campaigns.find(c => c.id === campaignId);
+    return campaign ? campaign.name.charAt(0).toUpperCase() : '?';
+  }
+
+  getAverageBet(): number {
+    if (this.filteredBets.length === 0) return 0;
+    const totalStaked = this.filteredBets.reduce((sum, bet) => sum + bet.stake, 0);
+    return totalStaked / this.filteredBets.length;
+  }
+
+  viewBetDetails(bet: Bet): void {
+    console.log('View bet details:', bet);
+    // Implement navigation: this.router.navigate(['/bets', bet.id]);
+  }
+
+  loadMoreBets(): void {
+    this.isLoadingMore = true;
+    
+    setTimeout(() => {
+      this.mobileCurrentPage++;
+      this.updateDisplayedBets();
+      this.isLoadingMore = false;
+    }, 500);
+  }
+
+  updateDisplayedBets(): void {
+    const endIndex = this.mobileCurrentPage * this.mobilePageSize;
+    this.displayedBets = this.filteredBets.slice(0, endIndex);
+    this.hasMoreBets = endIndex < this.filteredBets.length;
+  }
+
+  // Original helper methods
   getTotalCampaigns(): number {
     return this.campaigns.length;
   }

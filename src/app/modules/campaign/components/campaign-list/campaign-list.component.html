@@ -40,15 +40,20 @@
               
               <div class="col-md-4 mb-3" *ngIf="filterForm.get('timeFilter')?.value === 'custom'">
                 <label class="form-label">Custom Date Range</label>
-                <div class="input-group">
-                  <input type="date" class="form-control" [(ngModel)]="selectedStartDate" 
-                         [ngModelOptions]="{standalone: true}" placeholder="Start Date">
-                  <input type="date" class="form-control" [(ngModel)]="selectedEndDate" 
-                         [ngModelOptions]="{standalone: true}" placeholder="End Date">
-                  <button class="btn btn-outline-primary" (click)="setCustomDateRange()">
-                    Apply
-                  </button>
+                <div class="d-flex gap-2 align-items-center">
+                  <input type="date" class="form-control flex-grow-1" 
+                         [(ngModel)]="selectedStartDate" 
+                         [ngModelOptions]="{standalone: true}"
+                         (change)="onDateChange()"
+                         placeholder="Start Date">
+                  <span class="text-muted">to</span>
+                  <input type="date" class="form-control flex-grow-1" 
+                         [(ngModel)]="selectedEndDate"
+                         [ngModelOptions]="{standalone: true}"
+                         (change)="onDateChange()"
+                         placeholder="End Date">
                 </div>
+                <small class="text-muted mt-1 d-block">Dates apply automatically</small>
               </div>
             </div>
           </form>
@@ -57,7 +62,7 @@
     </div>
   </div>
 
-  <!-- Stats Overview (Updated with Profit/Loss) -->
+  <!-- Stats Overview -->
   <div class="row mb-4">
     <div class="col-md-3">
       <div class="stats-card card">
@@ -89,68 +94,68 @@
       </div>
     </div>
   </div>
-<!-- Profit/Loss Chart Section -->
-<div class="row mb-4" *ngIf="filteredBets.length > 0">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header">
-        <h5 class="mb-0">Profit/Loss Over Time</h5>
-        <small class="text-muted">Showing cumulative and daily profit/loss</small>
-      </div>
-      <div class="card-body">
-        <div class="chart-container" style="position: relative; height: 300px;">
-          <canvas baseChart
-                  [data]="profitLossChartData"
-                  [options]="profitLossChartOptions"
-                  [type]="'line'">
-          </canvas>
+
+  <!-- Profit/Loss Chart Section -->
+  <div class="row mb-4" *ngIf="filteredBets.length > 0">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Profit/Loss Over Time</h5>
+          <small class="text-muted">Showing cumulative and daily profit/loss</small>
         </div>
-        
-        <!-- Chart Summary Stats -->
-        <div class="row mt-3 text-center">
-          <div class="col-md-3 col-6 mb-2">
-            <div class="text-muted small">Total Profit/Loss</div>
-            <div class="h5" [ngClass]="{
-              'text-success': stats.totalProfitLoss > 0,
-              'text-danger': stats.totalProfitLoss < 0
-            }">
-              {{ stats.totalProfitLoss >= 0 ? '+' : '' }}{{ stats.totalProfitLoss | currencyFormat }}
+        <div class="card-body">
+          <div class="chart-container" style="position: relative; height: 300px;">
+            <canvas baseChart
+                    [data]="profitLossChartData"
+                    [options]="profitLossChartOptions"
+                    [type]="'line'">
+            </canvas>
+          </div>
+          
+          <!-- Chart Summary Stats -->
+          <div class="row mt-3 text-center">
+            <div class="col-md-3 col-6 mb-2">
+              <div class="text-muted small">Total Profit/Loss</div>
+              <div class="h5" [ngClass]="{
+                'text-success': stats.totalProfitLoss > 0,
+                'text-danger': stats.totalProfitLoss < 0
+              }">
+                {{ stats.totalProfitLoss >= 0 ? '+' : '' }}{{ stats.totalProfitLoss | currencyFormat }}
+              </div>
             </div>
-          </div>
-          <div class="col-md-3 col-6 mb-2">
-            <div class="text-muted small">Total Staked</div>
-            <div class="h5">{{ stats.totalStaked | currencyFormat }}</div>
-          </div>
-          <div class="col-md-3 col-6 mb-2">
-            <div class="text-muted small">ROI</div>
-            <div class="h5" [ngClass]="{
-              'text-success': stats.totalProfitLoss > 0,
-              'text-danger': stats.totalProfitLoss < 0
-            }">
-              {{ stats.totalStaked > 0 ? 
-                ((stats.totalProfitLoss / stats.totalStaked) * 100 | number:'1.1-1') : 0 }}%
+            <div class="col-md-3 col-6 mb-2">
+              <div class="text-muted small">Total Staked</div>
+              <div class="h5">{{ stats.totalStaked | currencyFormat }}</div>
             </div>
-          </div>
-          <div class="col-md-3 col-6 mb-2">
-            <div class="text-muted small">Avg. Profit/Bet</div>
-            <div class="h5" [ngClass]="{
-              'text-success': (stats.totalProfitLoss / stats.totalBets) > 0,
-              'text-danger': (stats.totalProfitLoss / stats.totalBets) < 0
-            }">
-              {{ stats.totalBets > 0 ? 
-                ((stats.totalProfitLoss / stats.totalBets) | currencyFormat) : 
-                (0 | currencyFormat) }}
+            <div class="col-md-3 col-6 mb-2">
+              <div class="text-muted small">ROI</div>
+              <div class="h5" [ngClass]="{
+                'text-success': stats.totalProfitLoss > 0,
+                'text-danger': stats.totalProfitLoss < 0
+              }">
+                {{ stats.totalStaked > 0 ? 
+                  ((stats.totalProfitLoss / stats.totalStaked) * 100 | number:'1.1-1') : 0 }}%
+              </div>
+            </div>
+            <div class="col-md-3 col-6 mb-2">
+              <div class="text-muted small">Avg. Profit/Bet</div>
+              <div class="h5" [ngClass]="{
+                'text-success': (stats.totalProfitLoss / stats.totalBets) > 0,
+                'text-danger': (stats.totalProfitLoss / stats.totalBets) < 0
+              }">
+                {{ stats.totalBets > 0 ? 
+                  ((stats.totalProfitLoss / stats.totalBets) | currencyFormat) : 
+                  (0 | currencyFormat) }}
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
-  <!-- All Bets Section -->
- <!-- All Bets Section -->
-<div class="row mb-5" *ngIf="filteredBets.length > 0">
-  <div class="col-12">
+
+  <!-- Desktop Table View (Hidden on mobile) -->
+  <div class="d-none d-md-block mb-5" *ngIf="filteredBets.length > 0">
     <div class="card">
       <div class="card-header">
         <h5 class="mb-0">All Bets ({{ filteredBets.length }})</h5>
@@ -161,13 +166,13 @@
           <table class="table table-hover mb-0">
             <thead>
               <tr>
-                <th class="text-nowrap">Campaign</th>
-                <th class="text-nowrap">Sport</th>
-                <th class="text-nowrap">Stake</th>
-                <th class="text-nowrap">Odds</th>
-                <th class="text-nowrap">Result</th>
-                <th class="text-nowrap">P/L</th>
-                <th class="text-nowrap">Date</th>
+                <th>Campaign</th>
+                <th>Sport</th>
+                <th>Stake</th>
+                <th>Odds</th>
+                <th>Result</th>
+                <th>P/L</th>
+                <th>Date</th>
               </tr>
             </thead>
             <tbody>
@@ -203,9 +208,205 @@
       </div>
     </div>
   </div>
-</div>
 
-  <!-- Campaigns Grid (Existing) -->
+  <!-- Mobile Card View (Hidden on desktop) -->
+  <div class="d-md-none mb-5" *ngIf="displayedBets.length > 0">
+    <div class="card">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="mb-0">All Bets ({{ filteredBets.length }})</h5>
+            <small class="text-muted">Tap on any bet for details</small>
+          </div>
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown">
+              <i class="fas fa-filter"></i>
+            </button>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" (click)="sortByDate()">
+                <i class="fas fa-calendar-alt mr-2"></i>Sort by Date
+              </a>
+              <a class="dropdown-item" (click)="sortByProfit()">
+                <i class="fas fa-chart-line mr-2"></i>Sort by Profit
+              </a>
+              <a class="dropdown-item" (click)="sortByStake()">
+                <i class="fas fa-money-bill-wave mr-2"></i>Sort by Stake
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick Filters -->
+      <div class="card-body py-3 border-bottom">
+        <div class="quick-filters">
+          <div class="d-flex flex-wrap gap-1">
+            <button class="btn btn-sm" 
+                    [class.btn-primary]="activeResultFilter === 'all'"
+                    [class.btn-outline-primary]="activeResultFilter !== 'all'"
+                    (click)="filterByResult('all')">
+              All
+            </button>
+            <button class="btn btn-sm" 
+                    [class.btn-success]="activeResultFilter === 'win'"
+                    [class.btn-outline-success]="activeResultFilter !== 'win'"
+                    (click)="filterByResult('win')">
+              Wins
+            </button>
+            <button class="btn btn-sm" 
+                    [class.btn-danger]="activeResultFilter === 'loss'"
+                    [class.btn-outline-danger]="activeResultFilter !== 'loss'"
+                    (click)="filterByResult('loss')">
+              Losses
+            </button>
+            <button class="btn btn-sm" 
+                    [class.btn-warning]="activeResultFilter === 'pending'"
+                    [class.btn-outline-warning]="activeResultFilter !== 'pending'"
+                    (click)="filterByResult('pending')">
+              Pending
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Bet Cards List -->
+      <div class="card-body p-0">
+        <div class="list-group list-group-flush">
+          <div *ngFor="let bet of displayedBets" 
+               class="list-group-item bet-card-item"
+               >
+            <div class="row align-items-center">
+              <!-- Campaign & Date -->
+              <div class="col-7">
+                <div class="d-flex align-items-center mb-1">
+                  <div class="campaign-badge mr-2">
+                    <span class="badge badge-light">{{ getCampaignInitial(bet.campaign_id) }}</span>
+                  </div>
+                  <div class="campaign-info">
+                    <div class="campaign-name text-truncate">
+                      <strong>{{ getCampaignName(bet.campaign_id) }}</strong>
+                    </div>
+                    <div class="bet-date text-muted small">
+                      <i class="far fa-clock mr-1"></i>{{ bet.created_at | date:'MMM d, HH:mm' }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Result Badge -->
+              <div class="col-5 text-right">
+                <span class="badge result-badge-mobile" [ngClass]="{
+                  'badge-win': bet.result === 'win',
+                  'badge-loss': bet.result === 'loss',
+                  'badge-pending': bet.result === 'pending',
+                  'badge-void': bet.result === 'void'
+                }">
+                  {{ bet.result | titlecase }}
+                </span>
+              </div>
+            </div>
+            
+            <!-- Bet Details Row -->
+            <div class="row mt-2">
+              <!-- Sport & Odds -->
+              <div class="col-6">
+                <div class="sport-info">
+                  <div class="sport-name">
+                    <i class="fas fa-running mr-1"></i>{{ bet.sport | titlecase }}
+                  </div>
+                  <div class="odds small text-muted">
+                    <i class="fas fa-chart-bar mr-1"></i>Odds: {{ bet.odds | number:'1.2-2' }}
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Stake & Profit -->
+              <div class="col-6 text-right">
+                <div class="stake-info mb-1">
+                  <div class="stake-amount">
+                    <i class="fas fa-coins mr-1"></i>{{ bet.stake | currencyFormat }}
+                  </div>
+                </div>
+                <div class="profit-info" [ngClass]="{
+                  'text-success': bet.profit_loss > 0,
+                  'text-danger': bet.profit_loss < 0,
+                  'text-muted': bet.profit_loss === 0
+                }">
+                  <strong>
+                    <span *ngIf="bet.profit_loss > 0">+</span>
+                    {{ bet.profit_loss | currencyFormat }}
+                  </strong>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="row mt-2">
+              <div class="col-12">
+                <div class="d-flex justify-content-between">
+      
+                  <div class="quick-stats">
+                    <span class="small text-muted">
+                      <i class="fas fa-percentage mr-1"></i>
+                      ROI: {{ bet.stake > 0 ? ((bet.profit_loss / bet.stake) * 100 | number:'1.1-1') : '0' }}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Loading More Indicator -->
+        <div *ngIf="isLoadingMore" class="text-center py-3">
+          <div class="spinner-border spinner-border-sm text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+          <small class="text-muted ml-2">Loading more bets...</small>
+        </div>
+        
+        <!-- Load More Button -->
+        <div *ngIf="hasMoreBets && !isLoadingMore" class="text-center py-3">
+          <button class="btn btn-outline-primary btn-sm" (click)="loadMoreBets()">
+            <i class="fas fa-plus mr-1"></i>Load More Bets
+          </button>
+        </div>
+        
+        <!-- No More Bets -->
+        <div *ngIf="!hasMoreBets && filteredBets.length > 10" class="text-center py-3">
+          <small class="text-muted">
+            <i class="fas fa-check-circle text-success mr-1"></i>
+            All bets loaded
+          </small>
+        </div>
+      </div>
+      
+      <!-- Summary Footer -->
+      <div class="card-footer">
+        <div class="row text-center">
+          <div class="col-4">
+            <div class="small text-muted">Total P/L</div>
+            <div class="font-weight-bold" [ngClass]="{
+              'text-success': stats.totalProfitLoss > 0,
+              'text-danger': stats.totalProfitLoss < 0
+            }">
+              {{ stats.totalProfitLoss >= 0 ? '+' : '' }}{{ stats.totalProfitLoss | currencyFormat }}
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="small text-muted">Win Rate</div>
+            <div class="font-weight-bold">{{ stats.winRate | number:'1.1-1' }}%</div>
+          </div>
+          <div class="col-4">
+            <div class="small text-muted">Avg Bet</div>
+            <div class="font-weight-bold">{{ getAverageBet() | currencyFormat }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Campaigns Grid -->
   <div class="row" *ngIf="campaigns.length > 0; else noCampaigns">
     <div class="col-12 mb-4">
       <h4 class="mb-4" style="color: var(--dark-color);">Active Campaigns</h4>
