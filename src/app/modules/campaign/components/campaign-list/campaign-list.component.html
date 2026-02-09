@@ -89,62 +89,121 @@
       </div>
     </div>
   </div>
-
-  <!-- All Bets Section -->
-  <div class="row mb-5" *ngIf="filteredBets.length > 0">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header">
-          <h5 class="mb-0">All Bets ({{ filteredBets.length }})</h5>
-          <small class="text-muted">Showing bets based on selected filters</small>
+<!-- Profit/Loss Chart Section -->
+<div class="row mb-4" *ngIf="filteredBets.length > 0">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Profit/Loss Over Time</h5>
+        <small class="text-muted">Showing cumulative and daily profit/loss</small>
+      </div>
+      <div class="card-body">
+        <div class="chart-container" style="position: relative; height: 300px;">
+          <canvas baseChart
+                  [data]="profitLossChartData"
+                  [options]="profitLossChartOptions"
+                  [type]="'line'">
+          </canvas>
         </div>
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>Campaign</th>
-                  <th>Sport</th>
-                  <th>Stake</th>
-                  <th>Odds</th>
-                  <th>Result</th>
-                  <th>Profit/Loss</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let bet of filteredBets">
-                  <td>
-                    <strong>{{ getCampaignName(bet.campaign_id) }}</strong>
-                  </td>
-                  <td>{{ bet.sport }}</td>
-                  <td>{{ bet.stake | currencyFormat }}</td>
-                  <td>{{ bet.odds | number:'1.2-2' }}</td>
-                  <td>
-                    <span class="badge" [ngClass]="{
-                      'badge-success': bet.result === 'win',
-                      'badge-danger': bet.result === 'loss',
-                      'badge-warning': bet.result === 'pending',
-                      'badge-info': bet.result === 'void'
-                    }">
-                      {{ bet.result | titlecase }}
-                    </span>
-                  </td>
-                  <td [ngClass]="{
-                    'text-success': bet.profit_loss > 0,
-                    'text-danger': bet.profit_loss < 0
-                  }">
-                    {{ bet.profit_loss | currencyFormat }}
-                  </td>
-                  <td>{{ bet.created_at | date:'shortDate' }}</td>
-                </tr>
-              </tbody>
-            </table>
+        
+        <!-- Chart Summary Stats -->
+        <div class="row mt-3 text-center">
+          <div class="col-md-3 col-6 mb-2">
+            <div class="text-muted small">Total Profit/Loss</div>
+            <div class="h5" [ngClass]="{
+              'text-success': stats.totalProfitLoss > 0,
+              'text-danger': stats.totalProfitLoss < 0
+            }">
+              {{ stats.totalProfitLoss >= 0 ? '+' : '' }}{{ stats.totalProfitLoss | currencyFormat }}
+            </div>
+          </div>
+          <div class="col-md-3 col-6 mb-2">
+            <div class="text-muted small">Total Staked</div>
+            <div class="h5">{{ stats.totalStaked | currencyFormat }}</div>
+          </div>
+          <div class="col-md-3 col-6 mb-2">
+            <div class="text-muted small">ROI</div>
+            <div class="h5" [ngClass]="{
+              'text-success': stats.totalProfitLoss > 0,
+              'text-danger': stats.totalProfitLoss < 0
+            }">
+              {{ stats.totalStaked > 0 ? 
+                ((stats.totalProfitLoss / stats.totalStaked) * 100 | number:'1.1-1') : 0 }}%
+            </div>
+          </div>
+          <div class="col-md-3 col-6 mb-2">
+            <div class="text-muted small">Avg. Profit/Bet</div>
+            <div class="h5" [ngClass]="{
+              'text-success': (stats.totalProfitLoss / stats.totalBets) > 0,
+              'text-danger': (stats.totalProfitLoss / stats.totalBets) < 0
+            }">
+              {{ stats.totalBets > 0 ? 
+                ((stats.totalProfitLoss / stats.totalBets) | currencyFormat) : 
+                (0 | currencyFormat) }}
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
+  <!-- All Bets Section -->
+ <!-- All Bets Section -->
+<div class="row mb-5" *ngIf="filteredBets.length > 0">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">All Bets ({{ filteredBets.length }})</h5>
+        <small class="text-muted">Showing bets based on selected filters</small>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th class="text-nowrap">Campaign</th>
+                <th class="text-nowrap">Sport</th>
+                <th class="text-nowrap">Stake</th>
+                <th class="text-nowrap">Odds</th>
+                <th class="text-nowrap">Result</th>
+                <th class="text-nowrap">P/L</th>
+                <th class="text-nowrap">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let bet of filteredBets">
+                <td class="text-truncate" style="max-width: 150px;">
+                  <strong>{{ getCampaignName(bet.campaign_id) }}</strong>
+                </td>
+                <td>{{ bet.sport | titlecase }}</td>
+                <td class="text-nowrap">{{ bet.stake | currencyFormat }}</td>
+                <td>{{ bet.odds | number:'1.2-2' }}</td>
+                <td>
+                  <span class="badge result-badge" [ngClass]="{
+                    'badge-win': bet.result === 'win',
+                    'badge-loss': bet.result === 'loss',
+                    'badge-pending': bet.result === 'pending',
+                    'badge-void': bet.result === 'void'
+                  }">
+                    {{ bet.result | titlecase }}
+                  </span>
+                </td>
+                <td class="text-nowrap" [ngClass]="{
+                  'text-success': bet.profit_loss > 0,
+                  'text-danger': bet.profit_loss < 0,
+                  'text-muted': bet.profit_loss === 0
+                }">
+                  <span *ngIf="bet.profit_loss > 0">+</span>{{ bet.profit_loss | currencyFormat }}
+                </td>
+                <td class="text-nowrap">{{ bet.created_at | date:'shortDate' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
   <!-- Campaigns Grid (Existing) -->
   <div class="row" *ngIf="campaigns.length > 0; else noCampaigns">

@@ -37,3 +37,99 @@
     }
   }
 }
+
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  
+  .table {
+    min-width: 800px; // Minimum width for table to be readable
+    margin-bottom: 0;
+    
+    @media (max-width: 768px) {
+      min-width: 1000px; // More width for mobile to prevent squeezing
+    }
+    
+    th {
+      background-color: #f8f9fa;
+      border-top: none;
+      font-weight: 600;
+      padding: 12px 16px;
+      white-space: nowrap;
+    }
+    
+    td {
+      padding: 12px 16px;
+      vertical-align: middle;
+      border-top: 1px solid #e9ecef;
+    }
+    
+    tr:hover {
+      background-color: #f8f9fa;
+    }
+  }
+}
+
+/* Result Badge Styles */
+.result-badge {
+  font-size: 0.75rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 50rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: inline-block;
+  min-width: 60px;
+  text-align: center;
+  
+  &.badge-win {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+  
+  &.badge-loss {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+  
+  &.badge-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+  }
+  
+  &.badge-void {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+  }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .card {
+    border-radius: 0;
+    margin-left: -15px;
+    margin-right: -15px;
+    width: calc(100% + 30px);
+  }
+  
+  .table-responsive {
+    margin: 0 -1px;
+    
+    .table {
+      font-size: 0.875rem;
+      
+      td, th {
+        padding: 8px 12px;
+      }
+    }
+  }
+  
+  .text-truncate {
+    max-width: 120px !important;
+  }
+}
