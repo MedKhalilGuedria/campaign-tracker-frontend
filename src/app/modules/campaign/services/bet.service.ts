@@ -57,4 +57,13 @@ export class BetService {
   updateBet(betId: number, data: UpdateBetData): Observable<Bet> {
     return this.http.patch<Bet>(`${this.apiUrl}/${betId}`, data);
   }
+
+   getAllBets(): Observable<Bet[]> {
+    return this.http.get<Bet[]>(`${this.apiUrl}/all`);
+  }
+
+  getCampaignBets(campaignId: number): Observable<Bet[]> {
+    return this.http.get<Bet[]>(`${this.apiUrl}/campaign/${campaignId}`);
+  }
+  
 }

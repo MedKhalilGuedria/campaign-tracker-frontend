@@ -1,0 +1,39 @@
+.stats-card {
+  .stat-value {
+    &.text-success {
+      color: #28a745 !important;
+    }
+    &.text-danger {
+      color: #dc3545 !important;
+    }
+  }
+}
+
+.table {
+  th {
+    border-top: none;
+    font-weight: 600;
+  }
+  
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+.input-group {
+  .form-control {
+    max-width: 140px;
+  }
+}
+
+.campaign-card {
+  .progress {
+    border-radius: 4px;
+    overflow: hidden;
+    
+    .progress-bar {
+      border-radius: 4px;
+    }
+  }
+}

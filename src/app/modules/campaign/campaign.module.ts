@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgChartsModule } from 'ng2-charts';
 
@@ -36,7 +36,9 @@ import { CampaignDateFilterComponent } from './components/campaign-date-filter/c
     CommonModule,
     FormsModule,
     RouterModule,
-    NgChartsModule
+    NgChartsModule,
+    ReactiveFormsModule
+    
   ],
   exports: [
     CampaignListComponent,
