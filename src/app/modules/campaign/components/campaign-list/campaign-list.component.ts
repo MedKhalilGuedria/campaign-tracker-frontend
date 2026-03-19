@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ChartConfiguration } from 'chart.js';
+import { Router } from '@angular/router';
 import { CampaignService, Campaign } from '../../services/campaign.service';
 import { BetService, Bet } from '../../services/bet.service';
 import { CurrencyService } from '../../services/currency.service';
@@ -10,6 +11,10 @@ interface CampaignStats {
   totalStaked: number;
   totalBets: number;
   winRate: number;
+  wins: number;
+  losses: number;
+  pending: number;
+  void: number;
 }
 
 @Component({
@@ -21,12 +26,23 @@ export class CampaignListComponent implements OnInit {
   campaigns: Campaign[] = [];
   allBets: Bet[] = [];
   filteredBets: Bet[] = [];
-  displayedBets: Bet[] = [];
+  showAllBets: boolean = false;
+  chartView: 'cumulative' | 'daily' | 'both' = 'both';
+  
   stats: CampaignStats = {
     totalProfitLoss: 0,
     totalStaked: 0,
     totalBets: 0,
-    winRate: 0
+    winRate: 0,
+    wins: 0,
+    losses: 0,
+    pending: 0,
+    void: 0
+  };
+  
+  winLossStats = {
+    wins: 0,
+    losses: 0
   };
   
   // Filter options
@@ -35,51 +51,46 @@ export class CampaignListComponent implements OnInit {
     { value: 'all', label: 'All Time' },
     { value: '30', label: 'Last 30 Days' },
     { value: '90', label: 'Last 90 Days' },
+    { value: '180', label: 'Last 6 Months' },
+    { value: '365', label: 'Last Year' },
     { value: 'custom', label: 'Custom Period' }
   ];
   
-  nameFilters = [
-    { value: 'all', label: 'All Campaigns' },
-    { value: 'contains', label: 'Contains "Campaign"' },
-    { value: 'not-contains', label: 'Does Not Contain "Campaign"' }
+  monthFilters = [
+    { value: 'all', label: 'All Months' },
+    { value: '0', label: 'January' },
+    { value: '1', label: 'February' },
+    { value: '2', label: 'March' },
+    { value: '3', label: 'April' },
+    { value: '4', label: 'May' },
+    { value: '5', label: 'June' },
+    { value: '6', label: 'July' },
+    { value: '7', label: 'August' },
+    { value: '8', label: 'September' },
+    { value: '9', label: 'October' },
+    { value: '10', label: 'November' },
+    { value: '11', label: 'December' }
   ];
 
-  showDatePicker = false;
   selectedStartDate: Date | null = null;
   selectedEndDate: Date | null = null;
   
-  // Mobile view properties
-  isLoadingMore = false;
-  hasMoreBets = false;
-  mobilePageSize = 10;
-  mobileCurrentPage = 1;
-  activeResultFilter = 'all';
-  
   // Chart properties
-  public profitLossChartData: ChartConfiguration<'line'>['data'] = {
-    labels: [],
-    datasets: []
-  };
+  private cumulativeData: number[] = [];
+  private dailyData: number[] = [];
+  private chartLabels: string[] = [];
 
   public profitLossChartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
       x: {
-        title: {
-          display: true,
-          text: 'Date'
-        },
-        ticks: {
-          maxTicksLimit: 10
-        }
+        title: { display: true, text: 'Date' },
+        ticks: { maxTicksLimit: 10 }
       },
       y: {
         beginAtZero: false,
-        title: {
-          display: true,
-          text: 'Profit/Loss'
-        },
+        title: { display: true, text: 'Profit/Loss' },
         ticks: {
           callback: (value) => {
             if (typeof value === 'string') {
@@ -95,10 +106,7 @@ export class CampaignListComponent implements OnInit {
       }
     },
     plugins: {
-      legend: {
-        display: true,
-        position: 'top'
-      },
+      legend: { display: true, position: 'top' },
       tooltip: {
         callbacks: {
           label: (context) => {
@@ -112,15 +120,36 @@ export class CampaignListComponent implements OnInit {
     }
   };
 
+  public winLossChartData: ChartConfiguration<'doughnut'>['data'] = {
+    labels: ['Wins', 'Losses'],
+    datasets: [{
+      data: [0, 0],
+      backgroundColor: ['#28a745', '#dc3545'],
+      hoverBackgroundColor: ['#34ce57', '#e74c3c'],
+      borderWidth: 0
+    }]
+  };
+
+  public winLossChartOptions: ChartConfiguration<'doughnut'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '70%',
+    plugins: {
+      legend: { display: false },
+      tooltip: { enabled: true }
+    }
+  };
+
   constructor(
     private campaignService: CampaignService,
     private betService: BetService,
     private fb: FormBuilder,
-    private currencyService: CurrencyService
+    private currencyService: CurrencyService,
+    private router: Router
   ) {
     this.filterForm = this.fb.group({
       timeFilter: ['all'],
-      nameFilter: ['all']
+      monthFilter: ['all']
     });
   }
 
@@ -136,7 +165,6 @@ export class CampaignListComponent implements OnInit {
   loadCampaigns(): void {
     this.campaignService.getAll().subscribe(data => {
       this.campaigns = data;
-      this.calculateStats();
     });
   }
 
@@ -150,7 +178,7 @@ export class CampaignListComponent implements OnInit {
   applyFilters(): void {
     let filtered = [...this.allBets];
     const timeFilter = this.filterForm.get('timeFilter')?.value || 'all';
-    const nameFilter = this.filterForm.get('nameFilter')?.value || 'all';
+    const monthFilter = this.filterForm.get('monthFilter')?.value;
 
     // Apply time filter
     if (timeFilter !== 'all') {
@@ -159,54 +187,34 @@ export class CampaignListComponent implements OnInit {
         const endDate = this.selectedEndDate;
         
         if (startDate) {
-          filtered = filtered.filter(bet => 
-            new Date(bet.created_at) >= startDate
-          );
+          filtered = filtered.filter(bet => new Date(bet.created_at) >= new Date(startDate));
         }
         if (endDate) {
-          filtered = filtered.filter(bet => 
-            new Date(bet.created_at) <= endDate
-          );
+          filtered = filtered.filter(bet => new Date(bet.created_at) <= new Date(endDate));
         }
       } else {
         const days = parseInt(timeFilter);
         if (!isNaN(days)) {
           const startDate = new Date();
           startDate.setDate(startDate.getDate() - days);
-          
-          filtered = filtered.filter(bet => 
-            new Date(bet.created_at) >= startDate
-          );
+          filtered = filtered.filter(bet => new Date(bet.created_at) >= startDate);
         }
       }
     }
 
-    // Apply name filter
-    if (nameFilter !== 'all') {
-      const campaignNames = this.campaigns.map(c => ({
-        id: c.id,
-        name: c.name.toLowerCase()
-      }));
-      
+    // Apply month filter
+    if (monthFilter && monthFilter !== 'all') {
+      const month = parseInt(monthFilter);
       filtered = filtered.filter(bet => {
-        const campaign = campaignNames.find(c => c.id === bet.campaign_id);
-        if (!campaign) return false;
-        
-        const containsCampaign = campaign.name.includes('campaign');
-        return nameFilter === 'contains' ? containsCampaign : !containsCampaign;
+        const betDate = new Date(bet.created_at);
+        return betDate.getMonth() === month;
       });
     }
 
-    // Apply result filter for mobile
-    if (this.activeResultFilter !== 'all') {
-      filtered = filtered.filter(bet => bet.result === this.activeResultFilter);
-    }
-
     this.filteredBets = filtered;
-    this.mobileCurrentPage = 1;
-    this.updateDisplayedBets();
     this.calculateStats();
-    this.updateProfitLossChart();
+    this.updateWinLossChart();
+    this.prepareChartData();
   }
 
   calculateStats(): void {
@@ -215,96 +223,139 @@ export class CampaignListComponent implements OnInit {
     const totalProfitLoss = allBets.reduce((sum, bet) => sum + (bet.profit_loss || 0), 0);
     const totalStaked = allBets.reduce((sum, bet) => sum + (bet.stake || 0), 0);
     const totalBets = allBets.length;
-    const winningBets = allBets.filter(bet => bet.result === 'win').length;
-    const winRate = totalBets > 0 ? (winningBets / totalBets) * 100 : 0;
+    const wins = allBets.filter(bet => bet.result === 'win').length;
+    const losses = allBets.filter(bet => bet.result === 'loss').length;
+    const pending = allBets.filter(bet => bet.result === 'pending').length;
+    const voids = allBets.filter(bet => bet.result === 'void').length;
+    const winRate = totalBets > 0 ? (wins / totalBets) * 100 : 0;
     
     this.stats = {
       totalProfitLoss,
       totalStaked,
       totalBets,
-      winRate
+      winRate,
+      wins,
+      losses,
+      pending,
+      void: voids
+    };
+    
+    this.winLossStats = {
+      wins,
+      losses
     };
   }
 
-  updateProfitLossChart(): void {
-    if (this.filteredBets.length === 0) return;
+  updateWinLossChart(): void {
+    this.winLossChartData = {
+      labels: ['Wins', 'Losses'],
+      datasets: [{
+        data: [this.stats.wins, this.stats.losses],
+        backgroundColor: ['#28a745', '#dc3545'],
+        hoverBackgroundColor: ['#34ce57', '#e74c3c'],
+        borderWidth: 0
+      }]
+    };
+  }
+
+  prepareChartData(): void {
+    if (this.filteredBets.length === 0) {
+      this.chartLabels = [];
+      this.cumulativeData = [];
+      this.dailyData = [];
+      return;
+    }
     
     const sortedBets = [...this.filteredBets].sort((a, b) => 
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
     
     let cumulativeProfitLoss = 0;
-    const dates: string[] = [];
-    const cumulativeData: number[] = [];
+    this.chartLabels = [];
+    this.cumulativeData = [];
+    this.dailyData = [];
     
     sortedBets.forEach(bet => {
       const date = new Date(bet.created_at);
-      const dateStr = date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
-      });
+      const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       
       cumulativeProfitLoss += bet.profit_loss || 0;
       
-      dates.push(dateStr);
-      cumulativeData.push(cumulativeProfitLoss);
+      this.chartLabels.push(dateStr);
+      this.cumulativeData.push(cumulativeProfitLoss);
+      this.dailyData.push(bet.profit_loss || 0);
     });
+  }
+
+  getChartData(): ChartConfiguration<'line'>['data'] {
+    const datasets = [];
     
-    const dailyData: number[] = sortedBets.map(bet => bet.profit_loss || 0);
+    if (this.chartView === 'cumulative' || this.chartView === 'both') {
+      datasets.push({
+        label: 'Cumulative Profit/Loss',
+        data: this.cumulativeData,
+        borderColor: '#3498db',
+        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+        fill: true,
+        tension: 0.4,
+        borderWidth: 3
+      });
+    }
     
-    this.profitLossChartData = {
-      labels: dates,
-      datasets: [
-        {
-          label: 'Cumulative Profit/Loss',
-          data: cumulativeData,
-          borderColor: '#3498db',
-          backgroundColor: 'rgba(52, 152, 219, 0.1)',
-          fill: true,
-          tension: 0.4,
-          borderWidth: 3
-        },
-        {
-          label: 'Daily Profit/Loss',
-          data: dailyData,
-          borderColor: '#e74c3c',
-          backgroundColor: 'rgba(231, 76, 60, 0.1)',
-          borderWidth: 2,
-          borderDash: [5, 5],
-          fill: false
-        }
-      ]
+    if (this.chartView === 'daily' || this.chartView === 'both') {
+      datasets.push({
+        label: 'Daily Profit/Loss',
+        data: this.dailyData,
+        borderColor: '#e74c3c',
+        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+        borderWidth: 2,
+        borderDash: this.chartView === 'both' ? [5, 5] : undefined,
+        fill: false
+      });
+    }
+    
+    return {
+      labels: this.chartLabels,
+      datasets
     };
   }
 
+  setChartView(view: 'cumulative' | 'daily' | 'both'): void {
+    this.chartView = view;
+  }
+
   onDateChange(): void {
-    if (this.selectedStartDate) {
+    if (this.selectedStartDate || this.selectedEndDate) {
       this.filterForm.get('timeFilter')?.setValue('custom');
       this.applyFilters();
     }
   }
 
-  // Mobile View Methods
-  filterByResult(result: string): void {
-    this.activeResultFilter = result;
+  resetFilters(): void {
+    this.filterForm.patchValue({
+      timeFilter: 'all',
+      monthFilter: 'all'
+    });
+    this.selectedStartDate = null;
+    this.selectedEndDate = null;
     this.applyFilters();
   }
 
-  sortByDate(): void {
-    this.filteredBets.sort((a, b) => 
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-    this.updateDisplayedBets();
+  viewCampaignDetails(campaignId: number): void {
+    this.router.navigate(['/campaigns', campaignId]);
   }
 
-  sortByProfit(): void {
-    this.filteredBets.sort((a, b) => b.profit_loss - a.profit_loss);
-    this.updateDisplayedBets();
+  viewAllBets(): void {
+    this.showAllBets = !this.showAllBets;
+    if (this.showAllBets) {
+      setTimeout(() => {
+        document.querySelector('.all-bets-section')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
   }
 
-  sortByStake(): void {
-    this.filteredBets.sort((a, b) => b.stake - a.stake);
-    this.updateDisplayedBets();
+  toggleAllBets(): void {
+    this.showAllBets = !this.showAllBets;
   }
 
   getCampaignName(campaignId: number): string {
@@ -312,41 +363,26 @@ export class CampaignListComponent implements OnInit {
     return campaign ? campaign.name : 'Unknown Campaign';
   }
 
-  getCampaignInitial(campaignId: number): string {
-    const campaign = this.campaigns.find(c => c.id === campaignId);
-    return campaign ? campaign.name.charAt(0).toUpperCase() : '?';
+  getRecentBets(limit: number = 5): Bet[] {
+    return [...this.filteredBets]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, limit);
   }
 
-  getAverageBet(): number {
-    if (this.filteredBets.length === 0) return 0;
-    const totalStaked = this.filteredBets.reduce((sum, bet) => sum + bet.stake, 0);
-    return totalStaked / this.filteredBets.length;
+  getBiggestWin(): number {
+    const wins = this.filteredBets.filter(bet => bet.profit_loss > 0);
+    if (wins.length === 0) return 0;
+    return Math.max(...wins.map(bet => bet.profit_loss));
   }
 
-  viewBetDetails(bet: Bet): void {
-    console.log('View bet details:', bet);
-    // Implement navigation: this.router.navigate(['/bets', bet.id]);
+  getBiggestLoss(): number {
+    const losses = this.filteredBets.filter(bet => bet.profit_loss < 0);
+    if (losses.length === 0) return 0;
+    return Math.min(...losses.map(bet => bet.profit_loss));
   }
 
-  loadMoreBets(): void {
-    this.isLoadingMore = true;
-    
-    setTimeout(() => {
-      this.mobileCurrentPage++;
-      this.updateDisplayedBets();
-      this.isLoadingMore = false;
-    }, 500);
-  }
-
-  updateDisplayedBets(): void {
-    const endIndex = this.mobileCurrentPage * this.mobilePageSize;
-    this.displayedBets = this.filteredBets.slice(0, endIndex);
-    this.hasMoreBets = endIndex < this.filteredBets.length;
-  }
-
-  // Original helper methods
-  getTotalCampaigns(): number {
-    return this.campaigns.length;
+  getNetFlow(): number {
+    return this.getTotalDeposits() - this.getTotalWithdrawals();
   }
 
   getTotalBalance(): number {
@@ -359,9 +395,5 @@ export class CampaignListComponent implements OnInit {
 
   getTotalWithdrawals(): number {
     return this.campaigns.reduce((sum, campaign) => sum + campaign.total_withdrawals, 0);
-  }
-
-  getTotalProfitLoss(): number {
-    return this.stats.totalProfitLoss;
   }
 }

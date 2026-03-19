@@ -1,14 +1,16 @@
-<div class="container">
+<div class="container-fluid">
   <!-- Header -->
-  <div class="row mb-5">
-    <div class="col-md-6">
-      <h1 class="display-5 mb-3" style="color: var(--dark-color);">📈 Campaign Dashboard</h1>
-      <p class="text-muted">Manage and track all your betting campaigns in one place</p>
-    </div>
-    <div class="col-md-6 text-md-right">
-      <button class="btn btn-primary btn-lg" routerLink="/campaigns/create">
-        <i class="fas fa-plus mr-2"></i>New Campaign
-      </button>
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="display-5 mb-2" style="color: var(--dark-color);">📈 Campaign Dashboard</h1>
+          <p class="text-muted">Manage and track all your betting campaigns in one place</p>
+        </div>
+        <button class="btn btn-primary btn-lg" routerLink="/campaigns/create">
+          <i class="fas fa-plus mr-2"></i>New Campaign
+        </button>
+      </div>
     </div>
   </div>
 
@@ -17,294 +19,313 @@
     <div class="col-12">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title mb-4">Filters</h5>
-          <form [formGroup]="filterForm">
-            <div class="row">
-              <div class="col-md-4 mb-3">
-                <label class="form-label">Time Period</label>
-                <select class="form-control" formControlName="timeFilter">
-                  <option *ngFor="let filter of timeFilters" [value]="filter.value">{{ filter.label }}</option>
-                </select>
-              </div>
-              
-              <div class="col-md-4 mb-3">
-                <label class="form-label">Campaign Name</label>
-                <select class="form-control" formControlName="nameFilter">
-                  <option *ngFor="let filter of nameFilters" [value]="filter.value">{{ filter.label }}</option>
-                </select>
-              </div>
-              
-              <div class="col-md-4 mb-3" *ngIf="filterForm.get('timeFilter')?.value === 'custom'">
-                <label class="form-label">Custom Date Range</label>
-                <div class="d-flex gap-2 align-items-center">
-                  <input type="date" class="form-control flex-grow-1" 
-                         [(ngModel)]="selectedStartDate" 
-                         [ngModelOptions]="{standalone: true}"
-                         (change)="onDateChange()">
-                  <span class="text-muted">to</span>
-                  <input type="date" class="form-control flex-grow-1" 
-                         [(ngModel)]="selectedEndDate"
-                         [ngModelOptions]="{standalone: true}"
-                         (change)="onDateChange()">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h5 class="card-title mb-3">Filters</h5>
+              <form [formGroup]="filterForm">
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Time Period</label>
+                    <select class="form-control" formControlName="timeFilter">
+                      <option *ngFor="let filter of timeFilters" [value]="filter.value">{{ filter.label }}</option>
+                    </select>
+                  </div>
+                  
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Month</label>
+                    <select class="form-control" formControlName="monthFilter">
+                      <option *ngFor="let month of monthFilters" [value]="month.value">{{ month.label }}</option>
+                    </select>
+                  </div>
+                  
+                  <div class="col-md-4 mb-3 d-flex align-items-end">
+                    <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+                      <i class="fas fa-undo mr-1"></i>Reset Filters
+                    </button>
+                  </div>
                 </div>
+              </form>
+            </div>
+            
+            <div class="col-md-4" *ngIf="filterForm.get('timeFilter')?.value === 'custom'">
+              <label class="form-label">Custom Date Range</label>
+              <div class="d-flex gap-2 align-items-center">
+                <input type="date" class="form-control" 
+                       [(ngModel)]="selectedStartDate" 
+                       [ngModelOptions]="{standalone: true}"
+                       (change)="onDateChange()">
+                <span class="text-muted">to</span>
+                <input type="date" class="form-control" 
+                       [(ngModel)]="selectedEndDate"
+                       [ngModelOptions]="{standalone: true}"
+                       (change)="onDateChange()">
               </div>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Stats Overview -->
-  <div class="row mb-4">
-    <div class="col-md-3">
-      <div class="stats-card card">
-        <div class="stat-value">{{ getTotalCampaigns() }}</div>
-        <div class="stat-label">Total Campaigns</div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="stats-card card">
-        <div class="stat-value" [ngClass]="{'text-success': getTotalProfitLoss() > 0,'text-danger': getTotalProfitLoss() < 0}">
-          {{ getTotalProfitLoss() | currencyFormat }}
-        </div>
-        <div class="stat-label">Total Profit/Loss</div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="stats-card card">
-        <div class="stat-value">{{ stats.totalBets }}</div>
-        <div class="stat-label">Total Bets</div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="stats-card card">
-        <div class="stat-value">{{ stats.winRate | number:'1.1-1' }}%</div>
-        <div class="stat-label">Win Rate</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Profit/Loss Chart -->
+  <!-- Profit/Loss Chart (Top) -->
   <div class="row mb-4" *ngIf="filteredBets.length > 0">
     <div class="col-12">
       <div class="card">
-        <div class="card-header">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
           <h5 class="mb-0">Profit/Loss Over Time</h5>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-primary" [class.active]="chartView === 'cumulative'" (click)="setChartView('cumulative')">Cumulative</button>
+            <button class="btn btn-outline-primary" [class.active]="chartView === 'daily'" (click)="setChartView('daily')">Daily</button>
+            <button class="btn btn-outline-primary" [class.active]="chartView === 'both'" (click)="setChartView('both')">Both</button>
+          </div>
         </div>
         <div class="card-body">
-          <div class="chart-container" style="position: relative; height: 300px;">
-            <canvas baseChart [data]="profitLossChartData" [options]="profitLossChartOptions" [type]="'line'"></canvas>
+          <div class="chart-container" style="position: relative; height: 350px;">
+            <canvas baseChart 
+                    [data]="getChartData()" 
+                    [options]="profitLossChartOptions" 
+                    [type]="'line'"></canvas>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Desktop Table View -->
-  <div class="d-none d-md-block mb-5" *ngIf="filteredBets.length > 0">
-    <div class="card">
-      <div class="card-header">
-        <h5 class="mb-0">All Bets ({{ filteredBets.length }})</h5>
-      </div>
-      <div class="card-body p-0">
-        <div class="bets-table-responsive">
-          <table class="table table-hover bets-table mb-0">
-            <thead>
-              <tr>
-                <th>Campaign</th>
-                <th>Sport</th>
-                <th>Stake</th>
-                <th>Odds</th>
-                <th>Result</th>
-                <th>P/L</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let bet of filteredBets">
-                <td class="text-truncate" style="max-width: 150px;">
-                  <strong>{{ getCampaignName(bet.campaign_id) }}</strong>
-                </td>
-                <td>{{ bet.sport | titlecase }}</td>
-                <td class="text-nowrap">{{ bet.stake | currencyFormat }}</td>
-                <td>{{ bet.odds | number:'1.2-2' }}</td>
-                <td>
-                  <span class="badge bets-result-badge" [ngClass]="{
-                    'badge-win': bet.result === 'win',
-                    'badge-loss': bet.result === 'loss',
-                    'badge-pending': bet.result === 'pending',
-                    'badge-void': bet.result === 'void'
-                  }">
-                    {{ bet.result | titlecase }}
-                  </span>
-                </td>
-                <td class="text-nowrap" [ngClass]="{
-                  'text-success': bet.profit_loss > 0,
-                  'text-danger': bet.profit_loss < 0,
-                  'text-muted': bet.profit_loss === 0
-                }">
-                  <span *ngIf="bet.profit_loss > 0">+</span>{{ bet.profit_loss | currencyFormat }}
-                </td>
-                <td class="text-nowrap">{{ bet.created_at | date:'shortDate' }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Mobile Card View -->
-  <div class="d-md-none mb-5" *ngIf="displayedBets.length > 0">
-    <div class="card">
-      <div class="card-header">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <h5 class="mb-0">All Bets ({{ filteredBets.length }})</h5>
-          </div>
-          <div class="dropdown">
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown">
-              <i class="fas fa-filter"></i>
-            </button>
-            <div class="dropdown-menu">
-              <a class="dropdown-item" (click)="sortByDate()"><i class="fas fa-calendar-alt mr-2"></i>Sort by Date</a>
-              <a class="dropdown-item" (click)="sortByProfit()"><i class="fas fa-chart-line mr-2"></i>Sort by Profit</a>
-              <a class="dropdown-item" (click)="sortByStake()"><i class="fas fa-money-bill-wave mr-2"></i>Sort by Stake</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="card-body py-3 border-bottom">
-        <div class="quick-filters">
-          <div class="d-flex flex-wrap gap-1">
-            <button class="btn btn-sm" [class.btn-primary]="activeResultFilter === 'all'" [class.btn-outline-primary]="activeResultFilter !== 'all'" (click)="filterByResult('all')">All</button>
-            <button class="btn btn-sm" [class.btn-success]="activeResultFilter === 'win'" [class.btn-outline-success]="activeResultFilter !== 'win'" (click)="filterByResult('win')">Wins</button>
-            <button class="btn btn-sm" [class.btn-danger]="activeResultFilter === 'loss'" [class.btn-outline-danger]="activeResultFilter !== 'loss'" (click)="filterByResult('loss')">Losses</button>
-            <button class="btn btn-sm" [class.btn-warning]="activeResultFilter === 'pending'" [class.btn-outline-warning]="activeResultFilter !== 'pending'" (click)="filterByResult('pending')">Pending</button>
-          </div>
-        </div>
-      </div>
-      
-      <div class="card-body p-0">
-        <div class="list-group list-group-flush">
-          <div *ngFor="let bet of displayedBets" class="list-group-item bet-card-item" (click)="viewBetDetails(bet)">
-            <div class="row align-items-center">
-              <div class="col-7">
-                <div class="d-flex align-items-center mb-1">
-                  <div class="campaign-badge mr-2">
-                    <span class="badge badge-light">{{ getCampaignInitial(bet.campaign_id) }}</span>
-                  </div>
-                  <div class="campaign-info">
-                    <div class="campaign-name text-truncate"><strong>{{ getCampaignName(bet.campaign_id) }}</strong></div>
-                    <div class="bet-date text-muted small"><i class="far fa-clock mr-1"></i>{{ bet.created_at | date:'MMM d, HH:mm' }}</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="col-5 text-right">
-                <span class="badge result-badge-mobile" [ngClass]="{
-                  'badge-win': bet.result === 'win',
-                  'badge-loss': bet.result === 'loss',
-                  'badge-pending': bet.result === 'pending',
-                  'badge-void': bet.result === 'void'
-                }">{{ bet.result | titlecase }}</span>
-              </div>
-            </div>
-            
-            <div class="row mt-2">
-              <div class="col-6">
-                <div class="sport-info">
-                  <div class="sport-name"><i class="fas fa-running mr-1"></i>{{ bet.sport | titlecase }}</div>
-                  <div class="odds small text-muted"><i class="fas fa-chart-bar mr-1"></i>Odds: {{ bet.odds | number:'1.2-2' }}</div>
-                </div>
-              </div>
-              
-              <div class="col-6 text-right">
-                <div class="stake-info mb-1">
-                  <div class="stake-amount"><i class="fas fa-coins mr-1"></i>{{ bet.stake | currencyFormat }}</div>
-                </div>
-                <div class="profit-info" [ngClass]="{
-                  'text-success': bet.profit_loss > 0,
-                  'text-danger': bet.profit_loss < 0,
-                  'text-muted': bet.profit_loss === 0
-                }"><strong><span *ngIf="bet.profit_loss > 0">+</span>{{ bet.profit_loss | currencyFormat }}</strong></div>
-              </div>
-            </div>
-            
-            <div class="row mt-2">
-              <div class="col-12">
-                <div class="d-flex justify-content-between">
-                  <button class="btn btn-sm btn-outline-info" (click)="$event.stopPropagation(); viewBetDetails(bet)"><i class="fas fa-eye mr-1"></i>View</button>
-                  <div class="quick-stats">
-                    <span class="small text-muted"><i class="fas fa-percentage mr-1"></i>ROI: {{ bet.stake > 0 ? ((bet.profit_loss / bet.stake) * 100 | number:'1.1-1') : '0' }}%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div *ngIf="isLoadingMore" class="text-center py-3">
-          <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-          <small class="text-muted ml-2">Loading more bets...</small>
-        </div>
-        
-        <div *ngIf="hasMoreBets && !isLoadingMore" class="text-center py-3">
-          <button class="btn btn-outline-primary btn-sm" (click)="loadMoreBets()"><i class="fas fa-plus mr-1"></i>Load More Bets</button>
-        </div>
-        
-        <div *ngIf="!hasMoreBets && filteredBets.length > 10" class="text-center py-3">
-          <small class="text-muted"><i class="fas fa-check-circle text-success mr-1"></i>All bets loaded</small>
-        </div>
-      </div>
-      
-      <div class="card-footer">
-        <div class="row text-center">
-          <div class="col-4"><div class="small text-muted">Total P/L</div><div class="font-weight-bold" [ngClass]="{'text-success': stats.totalProfitLoss > 0,'text-danger': stats.totalProfitLoss < 0}">{{ stats.totalProfitLoss >= 0 ? '+' : '' }}{{ stats.totalProfitLoss | currencyFormat }}</div></div>
-          <div class="col-4"><div class="small text-muted">Win Rate</div><div class="font-weight-bold">{{ stats.winRate | number:'1.1-1' }}%</div></div>
-          <div class="col-4"><div class="small text-muted">Avg Bet</div><div class="font-weight-bold">{{ getAverageBet() | currencyFormat }}</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Campaigns Grid -->
-  <div class="row" *ngIf="campaigns.length > 0; else noCampaigns">
-    <div class="col-12 mb-4"><h4 class="mb-4" style="color: var(--dark-color);">Active Campaigns</h4></div>
-    
-    <div class="col-md-6 col-lg-4" *ngFor="let campaign of campaigns">
-      <div class="card campaign-card h-100">
-        <div class="card-header">
+  <!-- Main Content: Two Column Layout -->
+  <div class="row">
+    <!-- Left Column: Campaigns List -->
+    <div class="col-lg-7 mb-4">
+      <div class="card h-100">
+        <div class="card-header bg-white">
           <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">{{ campaign.name }}</h5>
-            <span class="badge" [ngClass]="{'badge-success': campaign.current_balance > 0,'badge-warning': campaign.current_balance === 0}">{{ campaign.current_balance > 0 ? 'Active' : 'No Balance' }}</span>
+            <h4 class="mb-0" style="color: var(--dark-color);">Campaigns</h4>
+            <span class="badge badge-primary badge-pill">{{ campaigns.length }} Total</span>
+          </div>
+        </div>
+        
+        <div class="card-body p-0" *ngIf="campaigns.length > 0; else noCampaigns">
+          <div class="list-group list-group-flush">
+            <div *ngFor="let campaign of campaigns" class="list-group-item p-3">
+              <div class="row align-items-center">
+                <div class="col-8">
+                  <div class="d-flex align-items-center">
+                    <div class="campaign-icon mr-3">
+                      <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                        <i class="fas fa-trophy text-primary"></i>
+                      </div>
+                    </div>
+                    <div>
+                      <h5 class="mb-1">{{ campaign.name }}</h5>
+                      <div class="d-flex flex-wrap gap-3">
+                        <small class="text-muted mr-3">
+                          <i class="fas fa-wallet mr-1"></i>Balance: 
+                          <span [ngClass]="{'text-success': campaign.current_balance > 0, 'text-warning': campaign.current_balance <= 0}">
+                            {{ campaign.current_balance | currencyFormat }}
+                          </span>
+                        </small>
+                        <small class="text-muted mr-3">
+                          <i class="fas fa-arrow-up text-success mr-1"></i>{{ campaign.total_deposits | currencyFormat }}
+                        </small>
+                        <small class="text-muted">
+                          <i class="fas fa-arrow-down text-danger mr-1"></i>{{ campaign.total_withdrawals | currencyFormat }}
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-4 text-right">
+                  <div class="progress mb-2" style="height: 6px;">
+                    <div class="progress-bar bg-success" 
+                         [style.width.%]="(campaign.current_balance / campaign.start_balance) * 100"></div>
+                  </div>
+                  <div class="d-flex justify-content-end align-items-center">
+                    <small class="text-muted mr-2">Start: {{ campaign.start_balance | currencyFormat }}</small>
+                    <button class="btn btn-sm btn-outline-primary" (click)="viewCampaignDetails(campaign.id)">
+                      <i class="fas fa-arrow-right"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <ng-template #noCampaigns>
+          <div class="card-body text-center py-5">
+            <i class="fas fa-chart-line fa-4x text-muted mb-4"></i>
+            <h5 class="mb-3">No Campaigns Yet</h5>
+            <p class="text-muted mb-4">Start tracking your betting campaigns by creating your first one.</p>
+            <button class="btn btn-primary" routerLink="/campaigns/create">
+              <i class="fas fa-plus mr-2"></i>Create First Campaign
+            </button>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Right Column: Stats & Analytics -->
+    <div class="col-lg-5 mb-4">
+      <div class="card h-100">
+        <div class="card-header bg-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">📊 Analytics</h4>
+            <span class="text-muted">{{ filteredBets.length }} Bets</span>
           </div>
         </div>
         
         <div class="card-body">
-          <div class="mb-4">
-            <div class="d-flex justify-content-between mb-2">
-              <span class="text-muted">Current Balance</span>
-              <span class="font-weight-bold" [ngClass]="{'text-success': campaign.current_balance > 0,'text-warning': campaign.current_balance === 0}">{{ campaign.current_balance | currencyFormat }}</span>
+          <!-- Quick Stats -->
+          <div class="row mb-4">
+            <div class="col-6">
+              <div class="bg-light p-3 rounded">
+                <small class="text-muted d-block">Total Profit/Loss</small>
+                <h3 class="mb-0" [ngClass]="{'text-success': stats.totalProfitLoss > 0, 'text-danger': stats.totalProfitLoss < 0}">
+                  {{ stats.totalProfitLoss >= 0 ? '+' : '' }}{{ stats.totalProfitLoss | currencyFormat }}
+                </h3>
+              </div>
             </div>
-            
-            <div class="progress mb-3" style="height: 8px;">
-              <div class="progress-bar bg-success" [style.width.%]="(campaign.current_balance / campaign.start_balance) * 100"></div>
-            </div>
-            
-            <div class="row text-center">
-              <div class="col-6"><small class="text-muted d-block">Start</small><strong>{{ campaign.start_balance | currencyFormat }}</strong></div>
-              <div class="col-6"><small class="text-muted d-block">Created</small><strong>{{ campaign.created_at | date:'shortDate' }}</strong></div>
+            <div class="col-6">
+              <div class="bg-light p-3 rounded">
+                <small class="text-muted d-block">Win Rate</small>
+                <h3 class="mb-0">{{ stats.winRate | number:'1.1-1' }}%</h3>
+              </div>
             </div>
           </div>
           
-          <div class="d-flex justify-content-between">
-            <a [routerLink]="['/campaigns', campaign.id]" class="btn btn-outline-primary btn-sm"><i class="fas fa-eye mr-1"></i>View Details</a>
-            <div>
-              <span class="badge badge-light mr-1" *ngIf="campaign.total_deposits > 0">↗ {{ campaign.total_deposits | currencyFormat }}</span>
-              <span class="badge badge-light" *ngIf="campaign.total_withdrawals > 0">↘ {{ campaign.total_withdrawals | currencyFormat }}</span>
+          <!-- Circular Win/Loss Chart -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="card bg-light border-0">
+                <div class="card-body text-center">
+                  <h6 class="text-muted mb-3">Win/Loss Distribution</h6>
+                  <div class="chart-container" style="position: relative; height: 180px;">
+                    <canvas baseChart 
+                            [data]="winLossChartData" 
+                            [options]="winLossChartOptions" 
+                            [type]="'doughnut'"></canvas>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col-6">
+                      <div class="d-flex align-items-center justify-content-center">
+                        <span class="badge badge-success mr-2" style="width: 12px; height: 12px;">&nbsp;</span>
+                        <span>Wins: {{ winLossStats.wins }}</span>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="d-flex align-items-center justify-content-center">
+                        <span class="badge badge-danger mr-2" style="width: 12px; height: 12px;">&nbsp;</span>
+                        <span>Losses: {{ winLossStats.losses }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-2" *ngIf="stats.pending > 0 || stats.void > 0">
+                    <div class="col-6" *ngIf="stats.pending > 0">
+                      <small class="text-muted">Pending: {{ stats.pending }}</small>
+                    </div>
+                    <div class="col-6" *ngIf="stats.void > 0">
+                      <small class="text-muted">Void: {{ stats.void }}</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Key Metrics Grid -->
+          <div class="row">
+            <div class="col-6 mb-3">
+              <div class="metric-card p-3 border rounded">
+                <i class="fas fa-wallet fa-2x text-primary mb-2"></i>
+                <small class="text-muted d-block">Total Balance</small>
+                <h5 class="mb-0">{{ getTotalBalance() | currencyFormat }}</h5>
+              </div>
+            </div>
+            
+            <div class="col-6 mb-3">
+              <div class="metric-card p-3 border rounded">
+                <i class="fas fa-arrow-up fa-2x text-success mb-2"></i>
+                <small class="text-muted d-block">Total Deposited</small>
+                <h5 class="mb-0">{{ getTotalDeposits() | currencyFormat }}</h5>
+              </div>
+            </div>
+            
+            <div class="col-6 mb-3">
+              <div class="metric-card p-3 border rounded">
+                <i class="fas fa-arrow-down fa-2x text-danger mb-2"></i>
+                <small class="text-muted d-block">Total Withdrawn</small>
+                <h5 class="mb-0">{{ getTotalWithdrawals() | currencyFormat }}</h5>
+              </div>
+            </div>
+            
+            <div class="col-6 mb-3">
+              <div class="metric-card p-3 border rounded">
+                <i class="fas fa-chart-line fa-2x text-info mb-2"></i>
+                <small class="text-muted d-block">Net Flow</small>
+                <h5 class="mb-0" [ngClass]="{'text-success': getNetFlow() > 0, 'text-danger': getNetFlow() < 0}">
+                  {{ getNetFlow() >= 0 ? '+' : '' }}{{ getNetFlow() | currencyFormat }}
+                </h5>
+              </div>
+            </div>
+            
+            <div class="col-6 mb-3">
+              <div class="metric-card p-3 border rounded">
+                <i class="fas fa-trophy fa-2x text-warning mb-2"></i>
+                <small class="text-muted d-block">Biggest Win</small>
+                <h5 class="mb-0 text-success">{{ getBiggestWin() | currencyFormat }}</h5>
+              </div>
+            </div>
+            
+            <div class="col-6 mb-3">
+              <div class="metric-card p-3 border rounded">
+                <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
+                <small class="text-muted d-block">Biggest Loss</small>
+                <h5 class="mb-0 text-danger">{{ getBiggestLoss() | currencyFormat }}</h5>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Recent Bets with View All Button -->
+          <div class="mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0">Recent Bets</h6>
+              <button class="btn btn-sm btn-link" (click)="viewAllBets()">
+                View All <i class="fas fa-arrow-right ml-1"></i>
+              </button>
+            </div>
+            
+            <div class="list-group list-group-flush">
+              <div *ngFor="let bet of getRecentBets()" class="list-group-item px-0">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <small class="d-block font-weight-bold">{{ getCampaignName(bet.campaign_id) }}</small>
+                    <small class="text-muted">
+                      <i class="far fa-clock mr-1"></i>{{ bet.created_at | date:'MMM d, HH:mm' }}
+                      <span class="ml-2">{{ bet.sport | titlecase }}</span>
+                    </small>
+                  </div>
+                  <div class="text-right">
+                    <span class="badge mr-2" [ngClass]="{
+                      'badge-success': bet.result === 'win',
+                      'badge-danger': bet.result === 'loss',
+                      'badge-warning': bet.result === 'pending',
+                      'badge-secondary': bet.result === 'void'
+                    }">{{ bet.result | titlecase }}</span>
+                    <span class="d-block" [ngClass]="{
+                      'text-success': bet.profit_loss > 0,
+                      'text-danger': bet.profit_loss < 0
+                    }">
+                      <strong>{{ bet.profit_loss >= 0 ? '+' : '' }}{{ bet.profit_loss | currencyFormat }}</strong>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="text-center mt-3" *ngIf="filteredBets.length > 5">
+              <button class="btn btn-outline-primary btn-sm" (click)="viewAllBets()">
+                <i class="fas fa-list mr-1"></i>View All {{ filteredBets.length }} Bets
+              </button>
             </div>
           </div>
         </div>
@@ -312,18 +333,60 @@
     </div>
   </div>
 
-  <ng-template #noCampaigns>
-    <div class="row">
-      <div class="col-md-6 offset-md-3">
-        <div class="card text-center py-5">
-          <div class="card-body">
-            <i class="fas fa-chart-line fa-4x text-muted mb-4"></i>
-            <h4 class="mb-3" style="color: var(--dark-color);">No Campaigns Yet</h4>
-            <p class="text-muted mb-4">Start tracking your betting campaigns by creating your first one.</p>
-            <button class="btn btn-primary btn-lg" routerLink="/campaigns/create"><i class="fas fa-plus mr-2"></i>Create First Campaign</button>
+  <!-- Full Bets Table (Hidden by default, shown when clicking View All) -->
+  <div class="row mb-4" *ngIf="showAllBets">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">All Bets ({{ filteredBets.length }})</h5>
+          <button class="btn btn-sm btn-outline-secondary" (click)="toggleAllBets()">
+            <i class="fas fa-times mr-1"></i>Close
+          </button>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>Campaign</th>
+                  <th>Sport</th>
+                  <th>Stake</th>
+                  <th>Odds</th>
+                  <th>Result</th>
+                  <th>P/L</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let bet of filteredBets | slice:0:50">
+                  <td>{{ getCampaignName(bet.campaign_id) }}</td>
+                  <td>{{ bet.sport | titlecase }}</td>
+                  <td>{{ bet.stake | currencyFormat }}</td>
+                  <td>{{ bet.odds | number:'1.2-2' }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="{
+                      'badge-success': bet.result === 'win',
+                      'badge-danger': bet.result === 'loss',
+                      'badge-warning': bet.result === 'pending',
+                      'badge-secondary': bet.result === 'void'
+                    }">{{ bet.result | titlecase }}</span>
+                  </td>
+                  <td [ngClass]="{
+                    'text-success': bet.profit_loss > 0,
+                    'text-danger': bet.profit_loss < 0
+                  }">
+                    {{ bet.profit_loss >= 0 ? '+' : '' }}{{ bet.profit_loss | currencyFormat }}
+                  </td>
+                  <td>{{ bet.created_at | date:'mediumDate' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card-footer text-muted text-center" *ngIf="filteredBets.length > 50">
+            Showing first 50 of {{ filteredBets.length }} bets
           </div>
         </div>
       </div>
     </div>
-  </ng-template>
+  </div>
 </div>
