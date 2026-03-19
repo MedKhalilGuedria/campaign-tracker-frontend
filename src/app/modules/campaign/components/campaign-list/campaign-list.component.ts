@@ -140,6 +140,14 @@ export class CampaignListComponent implements OnInit {
     }
   };
 
+  // Mobile properties
+  mobileResultFilter: string = 'all';
+  mobileSortBy: string = 'date';
+  mobileCurrentPage: number = 1;
+  mobilePageSize: number = 10;
+  mobileTotalPages: number = 1;
+  mobileBets: Bet[] = [];
+
   constructor(
     private campaignService: CampaignService,
     private betService: BetService,
@@ -215,6 +223,12 @@ export class CampaignListComponent implements OnInit {
     this.calculateStats();
     this.updateWinLossChart();
     this.prepareChartData();
+    
+    // Reset mobile filters when main filters change
+    this.mobileResultFilter = 'all';
+    this.mobileSortBy = 'date';
+    this.mobileCurrentPage = 1;
+    this.applyMobileFilters();
   }
 
   calculateStats(): void {
@@ -345,7 +359,7 @@ export class CampaignListComponent implements OnInit {
     this.router.navigate(['/campaigns', campaignId]);
   }
 
-  viewAllBets(): void {
+  toggleAllBets(): void {
     this.showAllBets = !this.showAllBets;
     if (this.showAllBets) {
       setTimeout(() => {
@@ -354,8 +368,9 @@ export class CampaignListComponent implements OnInit {
     }
   }
 
-  toggleAllBets(): void {
-    this.showAllBets = !this.showAllBets;
+  viewBetDetails(bet: Bet): void {
+    console.log('View bet details:', bet);
+    // this.router.navigate(['/bets', bet.id]);
   }
 
   getCampaignName(campaignId: number): string {
@@ -395,5 +410,78 @@ export class CampaignListComponent implements OnInit {
 
   getTotalWithdrawals(): number {
     return this.campaigns.reduce((sum, campaign) => sum + campaign.total_withdrawals, 0);
+  }
+
+  getTotalStaked(): number {
+    return this.filteredBets.reduce((sum, bet) => sum + bet.stake, 0);
+  }
+
+  // Computed property for paginated desktop bets
+  get paginatedBets(): Bet[] {
+    return this.filteredBets.slice(0, 50); // Show first 50 in desktop view
+  }
+
+  // Computed property for paginated mobile bets
+  get paginatedMobileBets(): Bet[] {
+    const start = (this.mobileCurrentPage - 1) * this.mobilePageSize;
+    const end = start + this.mobilePageSize;
+    return this.mobileBets.slice(start, end);
+  }
+
+  // Filter mobile bets by result
+  filterMobileBets(result: string): void {
+    this.mobileResultFilter = result;
+    this.applyMobileFilters();
+    this.mobileCurrentPage = 1;
+  }
+
+  // Sort mobile bets
+  sortMobileBets(sortBy: string): void {
+    this.mobileSortBy = sortBy;
+    this.applyMobileFilters();
+  }
+
+  // Apply filters and sorting to mobile bets
+  applyMobileFilters(): void {
+    let bets = [...this.filteredBets];
+    
+    // Apply result filter
+    if (this.mobileResultFilter !== 'all') {
+      bets = bets.filter(bet => bet.result === this.mobileResultFilter);
+    }
+    
+    // Apply sorting
+    switch (this.mobileSortBy) {
+      case 'date':
+        bets.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      case 'profit':
+        bets.sort((a, b) => b.profit_loss - a.profit_loss);
+        break;
+      case 'stake':
+        bets.sort((a, b) => b.stake - a.stake);
+        break;
+    }
+    
+    this.mobileBets = bets;
+    this.mobileTotalPages = Math.ceil(bets.length / this.mobilePageSize);
+  }
+
+  // Mobile pagination methods
+  previousMobilePage(): void {
+    if (this.mobileCurrentPage > 1) {
+      this.mobileCurrentPage--;
+    }
+  }
+
+  nextMobilePage(): void {
+    if (this.mobileCurrentPage < this.mobileTotalPages) {
+      this.mobileCurrentPage++;
+    }
+  }
+
+  onMobilePageSizeChange(): void {
+    this.mobileCurrentPage = 1;
+    this.mobileTotalPages = Math.ceil(this.mobileBets.length / this.mobilePageSize);
   }
 }
