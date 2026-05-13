@@ -412,4 +412,48 @@ export class CampaignDetailComponent implements OnInit, OnDestroy {
     }, {} as any);
     return Object.values(map);
   }
+
+  markAsWin(bet: Bet): void {
+  const updatedBet: Bet = {
+    ...bet,
+    result: 'win',
+    profit_loss: bet.stake * (bet.odds - 1)
+  };
+  this.updateBetResult(updatedBet);
+}
+
+markAsLoss(bet: Bet): void {
+  const updatedBet: Bet = {
+    ...bet,
+    result: 'loss',
+    profit_loss: -bet.stake
+  };
+  this.updateBetResult(updatedBet);
+}
+
+markAsVoid(bet: Bet): void {
+  const updatedBet: Bet = {
+    ...bet,
+    result: 'void',
+    profit_loss: 0
+  };
+  this.updateBetResult(updatedBet);
+}
+
+private updateBetResult(updatedBet: Bet): void {
+  this.betService.updateResult(updatedBet.id, updatedBet.result, updatedBet.profit_loss)
+    .subscribe({
+      next: () => {
+        // Reload all data to refresh everything
+        if (this.campaign) {
+          this.loadBets(this.campaign.id);
+          this.loadCampaign(this.campaign.id);
+          this.updateGoals();
+        }
+      },
+      error: (error) => {
+        console.error('Error updating bet result:', error);
+      }
+    });
+}
 }

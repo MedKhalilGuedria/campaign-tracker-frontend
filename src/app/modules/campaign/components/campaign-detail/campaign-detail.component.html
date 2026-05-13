@@ -553,10 +553,11 @@
                     <th class="text-end">P/L</th>
                     <th class="text-center">Result</th>
                     <th>Date</th>
+                    <th class="text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let bet of pagedBets" class="bet-row">
+                  <tr *ngFor="let bet of pagedBets" class="bet-row" [class.bet-row-pending]="bet.result === 'pending'">
                     <td>
                       <span class="sport-icon me-1">{{ getSportIcon(bet.sport) }}</span>
                       <span class="sport-name">{{ bet.sport | titlecase }}</span>
@@ -573,6 +574,28 @@
                       </span>
                     </td>
                     <td class="date-cell text-muted">{{ bet.created_at | date:'MMM d, HH:mm' }}</td>
+                    <td class="text-center">
+                      <div class="action-buttons" *ngIf="bet.result === 'pending'">
+                        <button class="action-btn action-btn-win" 
+                                (click)="markAsWin(bet)" 
+                                title="Mark as Win">
+                          <i class="fas fa-check-circle"></i>
+                        </button>
+                        <button class="action-btn action-btn-loss" 
+                                (click)="markAsLoss(bet)" 
+                                title="Mark as Loss">
+                          <i class="fas fa-times-circle"></i>
+                        </button>
+                        <button class="action-btn action-btn-void" 
+                                (click)="markAsVoid(bet)" 
+                                title="Mark as Void">
+                          <i class="fas fa-ban"></i>
+                        </button>
+                      </div>
+                      <span *ngIf="bet.result !== 'pending'" class="settled-badge">
+                        <i class="fas fa-check-circle"></i> Settled
+                      </span>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -633,10 +656,26 @@
                   </div>
                 </div>
 
-                <!-- Card footer: date -->
+                <!-- Card footer: date + actions -->
                 <div class="mbc-footer">
-                  <i class="fas fa-clock me-1"></i>
-                  {{ bet.created_at | date:'MMM d, y — HH:mm' }}
+                  <div class="mbc-date">
+                    <i class="fas fa-clock me-1"></i>
+                    {{ bet.created_at | date:'MMM d, y — HH:mm' }}
+                  </div>
+                  <div class="mbc-actions" *ngIf="bet.result === 'pending'">
+                    <button class="mbc-action-btn win" (click)="markAsWin(bet)" title="Mark as Win">
+                      <i class="fas fa-check-circle"></i> Win
+                    </button>
+                    <button class="mbc-action-btn loss" (click)="markAsLoss(bet)" title="Mark as Loss">
+                      <i class="fas fa-times-circle"></i> Loss
+                    </button>
+                    <button class="mbc-action-btn void" (click)="markAsVoid(bet)" title="Mark as Void">
+                      <i class="fas fa-ban"></i> Void
+                    </button>
+                  </div>
+                  <span *ngIf="bet.result !== 'pending'" class="settled-badge-mobile">
+                    <i class="fas fa-check-circle"></i> Settled
+                  </span>
                 </div>
               </div>
             </div>
