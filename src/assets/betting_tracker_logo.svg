@@ -1,0 +1,77 @@
+<svg width="100%" viewBox="0 0 680 420" role="img" style="" xmlns="http://www.w3.org/2000/svg">
+<title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">BetTrack — Betting Campaign Tracker Logo</title>
+<desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">A bold logo for a betting campaign tracker app featuring a shield with a rising chart, a coin, and the wordmark BetTrack with tagline.</desc>
+
+<defs>
+  <clipPath id="shield-clip">
+    <path d="M340 48 L440 88 L440 220 Q440 310 340 358 Q240 310 240 220 L240 88 Z"/>
+  </clipPath>
+<mask id="imagine-text-gaps-ia60p5" maskUnits="userSpaceOnUse"><rect x="0" y="0" width="680" height="420" fill="white"/><rect x="330.875" y="299.6000061035156" width="18.40000057220459" height="21.600000381469727" fill="black" rx="2"/><rect x="470" y="131.60000610351562" width="96.9634780883789" height="80.80000305175781" fill="black" rx="2"/><rect x="470" y="189.60000610351562" width="149.35195922851562" height="80.80000305175781" fill="black" rx="2"/><rect x="470" y="273.6000061035156" width="169.21250915527344" height="21.600000381469727" fill="black" rx="2"/><rect x="262.375" y="152.60000610351562" width="36.17421913146973" height="16.800000190734863" fill="black" rx="2"/><rect x="314.40625" y="138.60000610351562" width="25.213672637939453" height="16.800000190734863" fill="black" rx="2"/></mask></defs>
+
+
+
+<!-- Background pill -->
+<rect x="60" y="24" width="560" height="372" rx="28" style="fill:rgb(26, 31, 46);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+<!-- Shield shadow/depth -->
+<path d="M347 56 L452 98 L452 228 Q452 325 347 374 Q242 325 242 228 L242 98 Z" style="fill:rgb(17, 24, 39);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+<!-- Shield body — deep navy -->
+<path d="M340 48 L445 90 L445 222 Q445 318 340 366 Q235 318 235 222 L235 90 Z" fill="#1e3a6e" style="fill:rgb(30, 58, 110);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+<!-- Shield inner panel — slightly lighter -->
+<path d="M340 68 L425 103 L425 218 Q425 300 340 342 Q255 300 255 218 L255 103 Z" fill="#1d4ed8" opacity="0.5" style="fill:rgb(29, 78, 216);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.5;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+<!-- Shield highlight stripe (top-left bevel) -->
+<path d="M255 103 L295 88 L295 96 L265 110 Z" fill="#ffffff" opacity="0.12" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.12;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+<!-- Chart line inside shield — clipped to shield -->
+<g clip-path="url(#shield-clip)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+  <!-- Chart area fill -->
+  <path d="M265 270 L285 248 L305 255 L330 218 L355 228 L380 190 L405 162 L425 148 L425 280 L265 280 Z" fill="#3b82f6" opacity="0.25" style="fill:rgb(59, 130, 246);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.25;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <!-- Chart line -->
+  <polyline points="265,270 285,248 305,255 330,218 355,228 380,190 405,162 425,148" fill="none" stroke="#60a5fa" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="fill:none;stroke:rgb(96, 165, 250);color:rgb(255, 255, 255);stroke-width:3.5px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <!-- Chart dots -->
+  <circle cx="265" cy="270" r="4" fill="#93c5fd" style="fill:rgb(147, 197, 253);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <circle cx="285" cy="248" r="4" fill="#93c5fd" style="fill:rgb(147, 197, 253);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <circle cx="305" cy="255" r="4" fill="#93c5fd" style="fill:rgb(147, 197, 253);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <circle cx="330" cy="218" r="4.5" fill="#bfdbfe" style="fill:rgb(191, 219, 254);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <circle cx="355" cy="228" r="4" fill="#93c5fd" style="fill:rgb(147, 197, 253);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <circle cx="380" cy="190" r="4.5" fill="#bfdbfe" style="fill:rgb(191, 219, 254);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <circle cx="405" cy="162" r="5" fill="#dbeafe" style="fill:rgb(219, 234, 254);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <circle cx="425" cy="148" r="5.5" fill="#ffffff" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <!-- Up arrow at top of chart -->
+  <path d="M418 132 L425 118 L432 132" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:2.5px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <line x1="425" y1="118" x2="425" y2="148" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" style="fill:rgb(0, 0, 0);stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:2.5px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+</g>
+
+<!-- Coin — bottom of shield -->
+<circle cx="340" cy="310" r="26" fill="#f59e0b" style="fill:rgb(245, 158, 11);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<circle cx="340" cy="310" r="21" fill="#fbbf24" style="fill:rgb(251, 191, 36);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<circle cx="340" cy="310" r="17" fill="#f59e0b" style="fill:rgb(245, 158, 11);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<!-- Coin symbol -->
+<text x="340" y="316" text-anchor="middle" font-family="Georgia,serif" font-size="16" font-weight="700" fill="#92400e" style="fill:rgb(146, 64, 14);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Georgia, serif;font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:auto">$</text>
+
+<!-- Shield border -->
+<path d="M340 48 L445 90 L445 222 Q445 318 340 366 Q235 318 235 222 L235 90 Z" fill="none" stroke="#3b82f6" stroke-width="2.5" opacity="0.8" style="fill:none;stroke:rgb(59, 130, 246);color:rgb(255, 255, 255);stroke-width:2.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.8;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+<!-- Wordmark -->
+<!-- "Bet" -->
+<text x="474" y="196" font-family="'Segoe UI',Arial,sans-serif" font-size="58" font-weight="700" letter-spacing="-1" style="fill:rgb(240, 244, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Segoe UI&quot;, Arial, sans-serif;font-size:58px;font-weight:700;text-anchor:start;dominant-baseline:auto">Bet</text>
+<!-- "Track" in blue -->
+<text x="474" y="254" font-family="'Segoe UI',Arial,sans-serif" font-size="58" font-weight="700" letter-spacing="-1" style="fill:rgb(79, 142, 247);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Segoe UI&quot;, Arial, sans-serif;font-size:58px;font-weight:700;text-anchor:start;dominant-baseline:auto">Track</text>
+
+<!-- Divider line -->
+<line x1="474" y1="268" x2="610" y2="268" stroke-width="1" mask="url(#imagine-text-gaps-ia60p5)" style="fill:rgb(0, 0, 0);stroke:rgb(46, 58, 82);color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+<!-- Tagline -->
+<text x="474" y="290" font-family="'Segoe UI',Arial,sans-serif" font-size="13" letter-spacing="2.5" style="fill:rgb(138, 155, 181);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Segoe UI&quot;, Arial, sans-serif;font-size:13px;font-weight:400;text-anchor:start;dominant-baseline:auto">CAMPAIGN TRACKER</text>
+
+<!-- Small stat pills bottom area of shield — decorative -->
+<rect x="259" y="152" width="42" height="18" rx="9" fill="#10b981" opacity="0.9" style="fill:rgb(16, 185, 129);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.9;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<text x="280" y="165" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="10" font-weight="700" fill="#ffffff" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Segoe UI&quot;, Arial, sans-serif;font-size:10px;font-weight:700;text-anchor:middle;dominant-baseline:auto">+12%</text>
+
+<rect x="309" y="138" width="36" height="18" rx="9" fill="#f59e0b" opacity="0.9" style="fill:rgb(245, 158, 11);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.9;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+<text x="327" y="151" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="10" font-weight="700" fill="#7c2d12" style="fill:rgb(124, 45, 18);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Segoe UI&quot;, Arial, sans-serif;font-size:10px;font-weight:700;text-anchor:middle;dominant-baseline:auto">ROI</text>
+
+</svg>

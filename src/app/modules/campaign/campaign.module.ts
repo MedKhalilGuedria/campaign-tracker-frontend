@@ -16,6 +16,7 @@ import { BetResultComponent } from './components/bet-result/bet-result.component
 import { CurrencySelectorComponent } from './components/currency-selector/currency-selector.component';
 import { CurrencyFormatPipe } from './pipes/currency.pipe';
 import { CampaignDateFilterComponent } from './components/campaign-date-filter/campaign-date-filter.component';
+import { ProfitLossChartComponent } from './components/profit-loss-chart/profit-loss-chart.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { CampaignDateFilterComponent } from './components/campaign-date-filter/c
     BetResultComponent,
     CurrencySelectorComponent,
     CurrencyFormatPipe,
-    CampaignDateFilterComponent
+    CampaignDateFilterComponent,
+    ProfitLossChartComponent
   ],
   imports: [
     CommonModule,

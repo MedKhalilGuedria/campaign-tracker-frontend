@@ -1,152 +1,106 @@
-/* ========== FIX FOR NAVBAR DROPDOWN ========== */
-/* These styles MUST come BEFORE Bootstrap */
-
-/* 1. Disable navbar clipping completely */
-.navbar,
-.navbar-collapse,
-.navbar-nav,
-.navbar-expand-lg {
-  overflow: visible !important;
-  position: static !important; /* Remove relative positioning */
-}
-
-/* 2. Fix the specific navbar container */
-.navbar > .container {
-  position: static !important; /* Critical: remove relative positioning */
-  overflow: visible !important;
-}
-
-/* 3. Make currency selector break out of navbar constraints */
-app-currency-selector {
-  position: static !important; /* Remove any positioning context */
-  display: block !important;
-  
-  .currency-selector {
-    position: static !important;
-    
-    /* Target ANY dropdown class */
-    [class*="dropdown"],
-    [class*="currency-dropdown"] {
-      position: fixed !important;
-      z-index: 999999 !important;
-      top: 60px !important; /* Adjust based on navbar height */
-      right: 20px !important;
-      transform: none !important;
-      will-change: transform, opacity;
-    }
-  }
-}
-
-/* 4. Nuclear option: Disable ALL stacking contexts */
-* {
-  transform: none !important;
-  perspective: none !important;
-  filter: none !important;
-}
-
-/* 5. Remove any backdrop-filter that creates stacking */
-.navbar {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-/* 6. Now import Bootstrap */
+/* ============================================================
+   IMPORTS — Bootstrap first, then overrides
+   ============================================================ */
 @import '~bootstrap/dist/css/bootstrap.min.css';
 
-/* 7. Override Bootstrap navbar defaults */
-.navbar {
-  z-index: 1 !important; /* Lower than dropdown */
-}
-
-.navbar .dropdown-menu {
-  z-index: 999999 !important;
-  position: fixed !important;
-}
-
-/* ========== End of navbar fix ========== */
-
-/* ========== NOW import Bootstrap ========== */
-@import '~bootstrap/dist/css/bootstrap.min.css';
-
-/* ========== OVERRIDE Bootstrap defaults that cause issues ========== */
-/* Fix navbar overflow and z-index */
-.navbar {
-  overflow: visible !important;
-  z-index: 1 !important;
-  
-  .navbar-collapse {
-    overflow: visible !important;
-  }
-  
-  .dropdown-menu {
-    z-index: 100000 !important;
-  }
-}
-
-/* Remove any transform/overflow that creates stacking contexts */
-.container,
-.container-fluid,
-.row,
-[class*="col-"] {
-  overflow: visible !important;
-  transform: none !important;
-}
-
-/* Disable Bootstrap's dropdown overflow */
-.dropdown {
-  overflow: visible !important;
-  
-  .dropdown-menu {
-    z-index: 100000 !important;
-    position: fixed !important;
-    transform: none !important;
-  }
-}
-
-/* ========== Your custom styles ========== */
-/* Custom Variables */
+/* ============================================================
+   CSS VARIABLES
+   ============================================================ */
 :root {
   --primary-color: #3498db;
   --secondary-color: #2ecc71;
-  --danger-color: #e74c3c;
-  --warning-color: #f39c12;
-  --dark-color: #2c3e50;
-  --light-color: #ecf0f1;
-  --gray-color: #95a5a6;
+  --danger-color:   #e74c3c;
+  --warning-color:  #f39c12;
+  --dark-color:     #2c3e50;
+  --light-color:    #ecf0f1;
+  --gray-color:     #95a5a6;
 }
 
-/* Global Styles */
-* {
+/* ============================================================
+   GLOBAL RESET (targeted — NOT *)
+   ============================================================ */
+html, body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
 }
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   color: var(--dark-color);
-  overflow-x: hidden !important;
-}
-.card .bets-table-responsive{overflow-x:auto;width:100%;display:block}.bets-table{width:100%;min-width:900px;th{background:#f8f9fa!important;border-top:none;font-weight:600;padding:1rem;white-space:nowrap;border-bottom:2px solid #dee2e6;color:#495057;position:sticky;top:0;z-index:1}td{padding:1rem;vertical-align:middle;border-top:1px solid #e9ecef;color:#212529}tr:hover{background:rgba(0,123,255,.05)}}.bets-result-badge{font-size:.75rem;padding:.35rem .75rem;border-radius:50rem;font-weight:600;text-transform:uppercase;display:inline-block;min-width:65px;text-align:center;&.badge-win{background:rgba(40,167,69,.15);color:#155724;border:1px solid rgba(40,167,69,.3)}&.badge-loss{background:rgba(220,53,69,.15);color:#721c24;border:1px solid rgba(220,53,69,.3)}&.badge-pending{background:rgba(255,193,7,.15);color:#856404;border:1px solid rgba(255,193,7,.3)}&.badge-void{background:rgba(23,162,184,.15);color:#0c5460;border:1px solid rgba(23,162,184,.3)}}.bet-card-item{padding:1rem;border-bottom:1px solid #e9ecef;cursor:pointer;&:active{background:#f8f9fa}.campaign-badge .badge-light{background:#e9ecef;color:#495057;font-weight:600;font-size:.85rem;padding:.5rem .7rem;border-radius:50%;min-width:2.5rem;min-height:2.5rem;display:flex;align-items:center;justify-content:center}.result-badge-mobile{font-size:.75rem;padding:.35rem .7rem;border-radius:50rem;font-weight:600;text-transform:uppercase;min-width:60px;display:inline-block;text-align:center;&.badge-win{background:rgba(40,167,69,.15);color:#155724;border:1px solid rgba(40,167,69,.3)}&.badge-loss{background:rgba(220,53,69,.15);color:#721c24;border:1px solid rgba(220,53,69,.3)}&.badge-pending{background:rgba(255,193,7,.15);color:#856404;border:1px solid rgba(255,193,7,.3)}&.badge-void{background:rgba(23,162,184,.15);color:#0c5460;border:1px solid rgba(23,162,184,.3)}}.campaign-name{font-size:.95rem;font-weight:600}.bet-date{font-size:.8rem;color:#6c757d}}.stats-card{padding:1.5rem;text-align:center;border:1px solid #e9ecef;border-radius:.5rem;.stat-value{font-size:2rem;font-weight:700;&.text-success{color:#28a745!important}&.text-danger{color:#dc3545!important}}.stat-label{color:#6c757d;font-size:.875rem;text-transform:uppercase}}.campaign-card{border:1px solid #e9ecef;border-radius:.5rem;.progress{height:8px;background:#e9ecef;border-radius:.25rem;.progress-bar{background:#28a745;border-radius:.25rem}}}@media (max-width:768px){.stats-card{padding:1rem;.stat-value{font-size:1.75rem}.stat-label{font-size:.8rem}}.bet-card-item{padding:.875rem;.campaign-name{font-size:.9rem}.result-badge-mobile{font-size:.7rem;padding:.3rem .6rem;min-width:55px}}}@media (max-width:576px){.stats-card{margin-bottom:.75rem;.stat-value{font-size:1.5rem}.stat-label{font-size:.75rem}}.bet-card-item{padding:.75rem;.campaign-badge .badge-light{font-size:.8rem;min-width:2.25rem;min-height:2.25rem;padding:.4rem .6rem}.campaign-name{font-size:.85rem}.result-badge-mobile{font-size:.65rem;padding:.25rem .5rem;min-width:50px}}}
-/* Container */
-.container-fluid {
-  padding: 20px;
-  overflow: visible !important;
 }
 
-/* Card Styles */
+/* ============================================================
+   NAVBAR — proper dropdown fix WITHOUT nuking the whole page
+   The correct fix is to give the navbar a high enough z-index
+   and make sure no parent creates a clipping stacking context.
+   ============================================================ */
+.navbar {
+  z-index: 1030;          /* Bootstrap default — keep it */
+  overflow: visible;      /* don't clip the dropdown */
+  position: relative;
+}
+
+.navbar .container,
+.navbar .container-fluid,
+.navbar-collapse,
+.navbar-nav {
+  overflow: visible;
+}
+
+/* Dropdown menus inside the navbar */
+.navbar .dropdown-menu {
+  z-index: 1050;          /* above navbar */
+  /* Let Bootstrap handle position: absolute normally */
+}
+
+/* ============================================================
+   CURRENCY SELECTOR DROPDOWN
+   Use position: absolute (not fixed) so it scrolls with page,
+   and a very high z-index to clear everything.
+   ============================================================ */
+app-currency-selector {
+  position: relative;
+  display: block;
+}
+
+app-currency-selector .currency-selector,
+app-currency-selector [class*="dropdown"],
+app-currency-selector [class*="currency-dropdown"] {
+  position: absolute;
+  z-index: 99999;
+  top: 100%;
+  right: 0;
+  /* Do NOT use position: fixed unless you manually track scroll */
+}
+
+/* If you truly need fixed positioning (e.g. inside a transformed parent): */
+.currency-dropdown-fixed {
+  position: fixed !important;
+  z-index: 99999 !important;
+  top: 64px;   /* match your navbar height */
+  right: 16px;
+}
+
+/* ============================================================
+   CARD STYLES
+   ============================================================ */
 .card {
   border: none;
   border-radius: 15px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   background: white;
   margin-bottom: 20px;
-  overflow: visible !important; /* Changed from hidden */
-  position: relative;
-  z-index: 1;
+  /* overflow: visible here breaks border-radius clipping on inner content;
+     only set it if a specific child needs to escape */
 }
 
 .card:hover {
@@ -160,24 +114,21 @@ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-bottom: none;
   padding: 20px;
   border-radius: 15px 15px 0 0 !important;
-  position: relative;
-  z-index: 1;
 }
 
 .card-body {
   padding: 25px;
-  position: relative;
-  z-index: 1;
 }
 
-/* Button Styles */
+/* ============================================================
+   BUTTONS
+   ============================================================ */
 .btn {
   border-radius: 8px;
   padding: 10px 25px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: none;
-  position: relative;
 }
 
 .btn-primary {
@@ -206,12 +157,14 @@ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Form Controls */
+/* ============================================================
+   FORM CONTROLS
+   ============================================================ */
 .form-control {
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   padding: 12px 15px;
-  transition: all 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .form-control:focus {
@@ -219,46 +172,186 @@ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
 }
 
-/* Badge Styles */
+/* ============================================================
+   BADGES
+   ============================================================ */
 .badge {
   padding: 6px 12px;
   border-radius: 20px;
   font-weight: 600;
 }
 
-/* Table Styles */
+/* ============================================================
+   TABLES
+   ============================================================ */
 .table {
   background: white;
   border-radius: 10px;
-  overflow: hidden;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-  position: relative;
-  z-index: 1;
 }
 
 .table thead th {
   background: linear-gradient(135deg, var(--primary-color), #2980b9);
-  //color: white;
   border: none;
   padding: 15px;
 }
 
 .table tbody tr {
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .table tbody tr:hover {
   background-color: rgba(52, 152, 219, 0.05);
 }
 
-/* Alert Styles */
-.alert {
-  border-radius: 10px;
-  border: none;
-  padding: 15px 20px;
+/* ============================================================
+   BETS TABLE
+   ============================================================ */
+.card .bets-table-responsive {
+  overflow-x: auto;
+  width: 100%;
+  display: block;
 }
 
-/* Balance Display */
+.bets-table {
+  width: 100%;
+  min-width: 900px;
+}
+
+.bets-table th {
+  background: #f8f9fa !important;
+  border-top: none;
+  font-weight: 600;
+  padding: 1rem;
+  white-space: nowrap;
+  border-bottom: 2px solid #dee2e6;
+  color: #495057;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.bets-table td {
+  padding: 1rem;
+  vertical-align: middle;
+  border-top: 1px solid #e9ecef;
+  color: #212529;
+}
+
+.bets-table tr:hover {
+  background: rgba(0, 123, 255, 0.05);
+}
+
+/* ============================================================
+   RESULT BADGES
+   ============================================================ */
+.bets-result-badge {
+  font-size: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 50rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  display: inline-block;
+  min-width: 65px;
+  text-align: center;
+}
+
+.bets-result-badge.badge-win {
+  background: rgba(40, 167, 69, 0.15);
+  color: #155724;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.bets-result-badge.badge-loss {
+  background: rgba(220, 53, 69, 0.15);
+  color: #721c24;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.bets-result-badge.badge-pending {
+  background: rgba(255, 193, 7, 0.15);
+  color: #856404;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.bets-result-badge.badge-void {
+  background: rgba(23, 162, 184, 0.15);
+  color: #0c5460;
+  border: 1px solid rgba(23, 162, 184, 0.3);
+}
+
+/* ============================================================
+   BET CARDS (MOBILE)
+   ============================================================ */
+.bet-card-item {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  cursor: pointer;
+}
+
+.bet-card-item:active {
+  background: #f8f9fa;
+}
+
+.bet-card-item .campaign-badge .badge-light {
+  background: #e9ecef;
+  color: #495057;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 50%;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bet-card-item .result-badge-mobile {
+  font-size: 0.75rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 50rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  min-width: 60px;
+  display: inline-block;
+  text-align: center;
+}
+
+.bet-card-item .result-badge-mobile.badge-win    { background: rgba(40,167,69,.15);  color:#155724; border:1px solid rgba(40,167,69,.3); }
+.bet-card-item .result-badge-mobile.badge-loss   { background: rgba(220,53,69,.15);  color:#721c24; border:1px solid rgba(220,53,69,.3); }
+.bet-card-item .result-badge-mobile.badge-pending{ background: rgba(255,193,7,.15);  color:#856404; border:1px solid rgba(255,193,7,.3); }
+.bet-card-item .result-badge-mobile.badge-void   { background: rgba(23,162,184,.15); color:#0c5460; border:1px solid rgba(23,162,184,.3); }
+
+.bet-card-item .campaign-name { font-size: 0.95rem; font-weight: 600; }
+.bet-card-item .bet-date      { font-size: 0.8rem;  color: #6c757d; }
+
+/* ============================================================
+   STATS CARDS
+   ============================================================ */
+.stats-card {
+  padding: 1.5rem;
+  text-align: center;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+}
+
+.stats-card .stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.stats-card .stat-value.text-success { color: #28a745 !important; }
+.stats-card .stat-value.text-danger  { color: #dc3545 !important; }
+.stats-card .stat-label {
+  color: #6c757d;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   BALANCE DISPLAY
+   ============================================================ */
 .balance-display {
   background: linear-gradient(135deg, var(--primary-color), #2980b9);
   color: white;
@@ -274,7 +367,18 @@ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   font-weight: 700;
 }
 
-/* Loading Spinner */
+/* ============================================================
+   ALERTS
+   ============================================================ */
+.alert {
+  border-radius: 10px;
+  border: none;
+  padding: 15px 20px;
+}
+
+/* ============================================================
+   SPINNER
+   ============================================================ */
 .spinner-container {
   display: flex;
   justify-content: center;
@@ -282,84 +386,16 @@ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 200px;
 }
 
-/* Stats Cards */
-.stats-card {
-  text-align: center;
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-}
-
-.stats-card .stat-value {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--primary-color);
-}
-
-.stats-card .stat-label {
-  color: var(--gray-color);
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-/* ========== CURRENCY DROPDOWN SPECIFIC FIXES ========== */
-/* This is the most important part - fixed positioning with high z-index */
-.currency-dropdown-container {
-  position: fixed !important;
-  z-index: 1000000 !important;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  pointer-events: none;
-  
-  .currency-dropdown-content {
-    position: absolute;
-    z-index: 1000001 !important;
-    pointer-events: auto;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-    min-width: 280px;
-  }
-}
-
-/* Force all parents to not clip */
-* {
-  overflow: visible !important;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-  .container-fluid {
-    padding: 10px;
-  }
-  
-  .card-body {
-    padding: 15px;
-  }
-  
-  .balance-display h3 {
-    font-size: 2rem;
-  }
-}
-
-/* Add to your global styles.css file */
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
 .dropdown-fade-in {
   animation: dropdownFadeIn 0.2s ease;
 }
 
 @keyframes dropdownFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .backdrop-fade-in {
@@ -367,14 +403,13 @@ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 @keyframes backdropFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
+/* ============================================================
+   MISC UTILITIES
+   ============================================================ */
 .btn-close {
   background: none;
   border: none;
@@ -389,9 +424,60 @@ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   opacity: 0.8;
 }
 
-
-/* Custom tooltip styling */
 .keep-alive-status {
   position: relative;
 }
 
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 10px;
+  }
+
+  .card-body {
+    padding: 15px;
+  }
+
+  .balance-display h3 {
+    font-size: 2rem;
+  }
+
+  .stats-card {
+    padding: 1rem;
+  }
+
+  .stats-card .stat-value { font-size: 1.75rem; }
+  .stats-card .stat-label { font-size: 0.8rem; }
+
+  .bet-card-item {
+    padding: 0.875rem;
+  }
+
+  .bet-card-item .campaign-name      { font-size: 0.9rem; }
+  .bet-card-item .result-badge-mobile{ font-size: 0.7rem; padding: 0.3rem 0.6rem; min-width: 55px; }
+}
+
+@media (max-width: 576px) {
+  .stats-card {
+    margin-bottom: 0.75rem;
+  }
+
+  .stats-card .stat-value { font-size: 1.5rem; }
+  .stats-card .stat-label { font-size: 0.75rem; }
+
+  .bet-card-item {
+    padding: 0.75rem;
+  }
+
+  .bet-card-item .campaign-badge .badge-light {
+    font-size: 0.8rem;
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .bet-card-item .campaign-name       { font-size: 0.85rem; }
+  .bet-card-item .result-badge-mobile { font-size: 0.65rem; padding: 0.25rem 0.5rem; min-width: 50px; }
+}

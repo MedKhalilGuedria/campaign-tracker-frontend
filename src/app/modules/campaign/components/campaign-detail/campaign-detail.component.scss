@@ -1,4 +1,8 @@
-// Goal Progress Colors
+// campaign-detail.component.scss
+
+// ─────────────────────────────────────────────────────────────────
+// GOAL PROGRESS & CARDS (Your existing styles)
+// ─────────────────────────────────────────────────────────────────
 .goal-progress {
   transition: width 0.6s ease;
 }
@@ -57,7 +61,7 @@
   }
 }
 
-// Responsive adjustments
+// Responsive adjustments for goals
 @media (max-width: 768px) {
   .goal-details {
     .col-4 {
@@ -66,6 +70,527 @@
       &:last-child {
         margin-bottom: 0;
       }
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// PAGINATION STYLES
+// ─────────────────────────────────────────────────────────────────
+.bets-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  .pagination-info {
+    font-size: 0.875rem;
+    color: #6c757d;
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+
+  .pg-btn {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #212529;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 2.25rem;
+    height: 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover:not(:disabled) {
+      background-color: #e9ecef;
+      border-color: #ced4da;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &.pg-num {
+      font-weight: 500;
+    }
+
+    &.pg-active {
+      background-color: #007bff;
+      border-color: #007bff;
+      color: white;
+      
+      &:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+      }
+    }
+  }
+
+  .pg-ellipsis {
+    padding: 0 0.25rem;
+    color: #6c757d;
+    font-size: 0.875rem;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// FILTER CHIPS & TOOLBAR
+// ─────────────────────────────────────────────────────────────────
+.bets-toolbar {
+  background: white;
+  
+  .filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .chip {
+    padding: 0.375rem 0.875rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #495057;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: #e9ecef;
+    }
+    
+    &.chip-active {
+      background: #007bff;
+      border-color: #007bff;
+      color: white;
+    }
+    
+    &.chip-win {
+      &.chip-active {
+        background: #28a745;
+        border-color: #28a745;
+      }
+    }
+    
+    &.chip-loss {
+      &.chip-active {
+        background: #dc3545;
+        border-color: #dc3545;
+      }
+    }
+    
+    &.chip-pending {
+      &.chip-active {
+        background: #ffc107;
+        border-color: #ffc107;
+        color: #212529;
+      }
+    }
+    
+    &.chip-void {
+      &.chip-active {
+        background: #6c757d;
+        border-color: #6c757d;
+      }
+    }
+  }
+  
+  .sort-select {
+    width: auto;
+    min-width: 130px;
+    font-size: 0.75rem;
+    border-radius: 0.375rem;
+    border-color: #dee2e6;
+    
+    &:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// DESKTOP BETS TABLE
+// ─────────────────────────────────────────────────────────────────
+.bets-desktop-table {
+  font-size: 0.875rem;
+  
+  thead th {
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    color: #495057;
+  }
+  
+  tbody td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    border-bottom-color: #e9ecef;
+  }
+  
+  .bet-row {
+    transition: background 0.2s ease;
+    
+    &:hover {
+      background: #f8f9fa;
+    }
+  }
+  
+  .sport-icon {
+    font-size: 1rem;
+  }
+  
+  .sport-name {
+    font-weight: 500;
+  }
+  
+  .odds-cell {
+    font-family: monospace;
+    font-weight: 600;
+  }
+  
+  .date-cell {
+    font-size: 0.75rem;
+  }
+}
+
+// Result pill styles
+.result-pill {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 2rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  
+  &.result-win {
+    background: #28a745;
+    color: white;
+  }
+  
+  &.result-loss {
+    background: #dc3545;
+    color: white;
+  }
+  
+  &.result-pending {
+    background: #ffc107;
+    color: #212529;
+  }
+  
+  &.result-void {
+    background: #6c757d;
+    color: white;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// MOBILE BET CARDS (for screens below md)
+// ─────────────────────────────────────────────────────────────────
+.mobile-bet-card {
+  background: white;
+  border-radius: 0.75rem;
+  margin: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #dee2e6;
+  transition: all 0.2s ease;
+  
+  &.mobile-bet-win {
+    border-left-color: #28a745;
+    background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
+  }
+  
+  &.mobile-bet-loss {
+    border-left-color: #dc3545;
+    background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+  }
+  
+  &.mobile-bet-pending {
+    border-left-color: #ffc107;
+  }
+  
+  &.mobile-bet-void {
+    border-left-color: #6c757d;
+  }
+  
+  .mbc-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  
+  .mbc-sport {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .mbc-sport-icon {
+    font-size: 1.25rem;
+  }
+  
+  .mbc-sport-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: capitalize;
+  }
+  
+  .mbc-pl {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    
+    &.mbc-pl-win {
+      color: #28a745;
+    }
+    
+    &.mbc-pl-loss {
+      color: #dc3545;
+    }
+    
+    &.mbc-pl-neutral {
+      color: #6c757d;
+    }
+  }
+  
+  .mbc-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-top: 1px solid #e9ecef;
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 0.75rem;
+  }
+  
+  .mbc-stat {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .mbc-stat-label {
+    display: block;
+    font-size: 0.65rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+  
+  .mbc-stat-value {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  
+  .mbc-stat-divider {
+    width: 1px;
+    height: 30px;
+    background: #dee2e6;
+  }
+  
+  .mbc-footer {
+    font-size: 0.7rem;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// BETS FOOTER SUMMARY
+// ─────────────────────────────────────────────────────────────────
+.bets-footer-summary {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.5rem;
+  padding: 0.75rem 1.25rem;
+  background: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #495057;
+  
+  span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  
+  strong {
+    font-weight: 700;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// TRANSACTION SECTION STYLES
+// ─────────────────────────────────────────────────────────────────
+.list-group-item {
+  transition: background 0.2s ease;
+  
+  &:hover {
+    background: #f8f9fa;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// RESPONSIVE BREAKPOINTS
+// ─────────────────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .bets-pagination {
+    flex-direction: column;
+    align-items: stretch;
+    
+    .pagination-controls {
+      justify-content: center;
+    }
+    
+    .pagination-info {
+      text-align: center;
+    }
+  }
+  
+  .bets-footer-summary {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .bets-toolbar .d-flex {
+    flex-direction: column;
+    align-items: stretch !important;
+    
+    .ms-auto {
+      margin-left: 0 !important;
+      margin-top: 0.5rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination-controls {
+    .pg-btn {
+      padding: 0.375rem 0.5rem;
+      min-width: 2rem;
+    }
+  }
+  
+  .filter-chips {
+    .chip {
+      padding: 0.25rem 0.625rem;
+      font-size: 0.7rem;
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// UTILITY CLASSES
+// ─────────────────────────────────────────────────────────────────
+.text-success {
+  color: #28a745 !important;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+
+.text-warning {
+  color: #ffc107 !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+.fw-semibold {
+  font-weight: 600;
+}
+
+// Loading spinner
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+// ─────────────────────────────────────────────────────────────────
+// BALANCE DISPLAY
+// ─────────────────────────────────────────────────────────────────
+.balance-display {
+  background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+  border-radius: 1rem;
+  padding: 1.5rem 2rem;
+  color: white;
+  box-shadow: 0 6px 18px rgba(21, 101, 192, 0.25);
+
+  small {
+    display: block;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0.35rem 0;
+    line-height: 1.1;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  }
+
+  .small {
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    .text-muted {
+      color: rgba(255,255,255,0.75) !important;
+    }
+  }
+
+  // Better visible colors on blue background
+  .text-success {
+    color: #7CFF8D !important;
+  }
+
+  .text-danger {
+    color: #FF8A80 !important;
+  }
+
+  .text-warning {
+    color: #FFE082 !important;
+  }
+}
+
+// Mobile adjustments
+@media (max-width: 768px) {
+  .balance-display {
+    padding: 1.25rem;
+
+    h2 {
+      font-size: 1.8rem;
+    }
+
+    .small {
+      font-size: 0.8rem;
     }
   }
 }

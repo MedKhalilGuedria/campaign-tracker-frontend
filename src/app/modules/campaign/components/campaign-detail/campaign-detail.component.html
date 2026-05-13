@@ -11,7 +11,7 @@
     <div class="col-md-8">
       <div class="d-flex align-items-center">
         <div class="me-3">
-          <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+          <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
                style="width: 60px; height: 60px; font-size: 24px; font-weight: bold;">
             {{ campaign.name.charAt(0) }}
           </div>
@@ -32,7 +32,7 @@
         <h2 class="mb-0" [ngClass]="{
           'text-success': campaign.current_balance > 0,
           'text-warning': campaign.current_balance === 0,
-          'text-danger': campaign.current_balance < 0
+          'text-danger':  campaign.current_balance < 0
         }">
           {{ campaign.current_balance | currencyFormat }}
         </h2>
@@ -157,7 +157,7 @@
               <div class="h5 text-muted" *ngIf="stats.biggestLoss >= 0">-</div>
             </div>
           </div>
-          
+
           <!-- Sport Performance -->
           <div class="mt-4" *ngIf="getSportPerformance().length > 0">
             <h6 class="mb-3">Performance by Sport</h6>
@@ -208,29 +208,27 @@
               <div class="text-muted small">Avg. Deposit</div>
               <div class="h5">
                 {{ getDepositTransactionsCount() > 0 ?
-  (stats.totalDeposits / getDepositTransactionsCount() | currencyFormat) : 
-  '$0.00' }}
+                  (stats.totalDeposits / getDepositTransactionsCount() | currencyFormat) :
+                  '$0.00' }}
               </div>
             </div>
           </div>
-          
+
           <!-- Recent Transactions -->
           <div class="mt-4">
             <h6 class="mb-3">Recent Transactions</h6>
             <div *ngIf="filteredTransactions.length > 0">
               <div class="list-group list-group-flush">
-                <div *ngFor="let transaction of filteredTransactions.slice(0, 5)" 
+                <div *ngFor="let transaction of filteredTransactions.slice(0, 5)"
                      class="list-group-item d-flex justify-content-between align-items-center">
                   <div>
-                    <i class="fas" 
+                    <i class="fas"
                        [class.fa-arrow-down]="transaction.type === 'deposit'"
                        [class.fa-arrow-up]="transaction.type === 'withdrawal'"
                        [class.text-success]="transaction.type === 'deposit'"
                        [class.text-danger]="transaction.type === 'withdrawal'"></i>
                     <span class="ms-2">{{ transaction.type | titlecase }}</span>
-                    <small class="text-muted ms-2">
-                      {{ transaction.created_at | date:'short' }}
-                    </small>
+                    <small class="text-muted ms-2">{{ transaction.created_at | date:'short' }}</small>
                   </div>
                   <span [ngClass]="transaction.type === 'deposit' ? 'text-success' : 'text-danger'">
                     {{ transaction.type === 'deposit' ? '+' : '-' }}{{ transaction.amount | currencyFormat }}
@@ -238,9 +236,7 @@
                 </div>
               </div>
               <div class="text-center mt-2" *ngIf="filteredTransactions.length > 5">
-                <small class="text-muted">
-                  + {{ filteredTransactions.length - 5 }} more transactions
-                </small>
+                <small class="text-muted">+ {{ filteredTransactions.length - 5 }} more transactions</small>
               </div>
             </div>
             <div *ngIf="filteredTransactions.length === 0" class="text-center py-4">
@@ -263,21 +259,20 @@
             <i class="fas fa-plus"></i> New Goal
           </button>
         </div>
-        
-        <!-- Goal Creation Form -->
+
         <div class="card-body" *ngIf="showGoalForm">
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
                 <label>Goal Title</label>
-                <input type="text" class="form-control" [(ngModel)]="newGoal.title" 
+                <input type="text" class="form-control" [(ngModel)]="newGoal.title"
                        placeholder="e.g., Reach $1000 profit">
               </div>
             </div>
             <div class="col-md-3">
               <div class="form-group">
                 <label>Target Amount ($)</label>
-                <input type="number" class="form-control" [(ngModel)]="newGoal.target_amount" 
+                <input type="number" class="form-control" [(ngModel)]="newGoal.target_amount"
                        min="1" step="0.01">
               </div>
             </div>
@@ -288,7 +283,7 @@
               </div>
             </div>
             <div class="col-md-2 d-flex align-items-end">
-              <button class="btn btn-success w-100" (click)="onCreateGoal()" 
+              <button class="btn btn-success w-100" (click)="onCreateGoal()"
                       [disabled]="!newGoal.title || !newGoal.target_amount">
                 Create
               </button>
@@ -296,82 +291,65 @@
           </div>
         </div>
 
-        <!-- Goals List -->
         <div class="card-body" *ngIf="goals.length > 0; else noGoals">
           <div class="row">
             <div class="col-md-6" *ngFor="let goal of goals">
-              <div class="card mb-3">
+              <div class="card mb-3 goal-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                  <h6 class="mb-0">{{goal.title}}</h6>
+                  <h6 class="mb-0">{{ goal.title }}</h6>
                   <span class="badge" [ngClass]="getGoalStatusClass(goal.status)">
-                    {{goal.status | titlecase}}
+                    {{ goal.status | titlecase }}
                   </span>
                 </div>
                 <div class="card-body">
-                  <!-- Progress Bar -->
                   <div class="mb-3">
                     <div class="d-flex justify-content-between mb-1">
-                      <small>Progress: {{goal.progress_percentage | number:'1.0-0'}}%</small>
-                      <small>{{goal.current_amount | currencyFormat}} / {{goal.target_amount | currencyFormat}}</small>
+                      <small>Progress: {{ goal.progress_percentage | number:'1.0-0' }}%</small>
+                      <small>{{ goal.current_amount | currencyFormat }} / {{ goal.target_amount | currencyFormat }}</small>
                     </div>
                     <div class="progress" style="height: 20px;">
-                      <div class="progress-bar" 
+                      <div class="progress-bar goal-progress"
                            [ngClass]="getGoalStatusClass(goal.status)"
                            [style.width]="goal.progress_percentage + '%'"
                            role="progressbar">
-                        {{goal.progress_percentage | number:'1.0-0'}}%
+                        {{ goal.progress_percentage | number:'1.0-0' }}%
                       </div>
                     </div>
                   </div>
-
-                  <!-- Goal Details -->
                   <div class="row text-center">
                     <div class="col-4">
                       <div class="border rounded p-2">
                         <div class="text-muted small">Remaining</div>
-                        <div class="h5 mb-0">{{goal.remaining_amount | currencyFormat}}</div>
+                        <div class="h5 mb-0">{{ goal.remaining_amount | currencyFormat }}</div>
                       </div>
                     </div>
                     <div class="col-4">
                       <div class="border rounded p-2">
                         <div class="text-muted small">Days Left</div>
-                        <div class="h5 mb-0" *ngIf="goal.days_remaining !== null">
-                          {{goal.days_remaining}}
-                        </div>
-                        <div class="h5 mb-0 text-muted" *ngIf="goal.days_remaining === null">
-                          -
-                        </div>
+                        <div class="h5 mb-0" *ngIf="goal.days_remaining !== null">{{ goal.days_remaining }}</div>
+                        <div class="h5 mb-0 text-muted" *ngIf="goal.days_remaining === null">-</div>
                       </div>
                     </div>
                     <div class="col-4">
                       <div class="border rounded p-2">
                         <div class="text-muted small">Daily Target</div>
                         <div class="h5 mb-0" *ngIf="goal.days_remaining && goal.days_remaining > 0">
-                          {{(goal.remaining_amount / goal.days_remaining) | currencyFormat}}
+                          {{ (goal.remaining_amount / goal.days_remaining) | currencyFormat }}
                         </div>
-                        <div class="h5 mb-0 text-muted" *ngIf="!goal.days_remaining || goal.days_remaining <= 0">
-                          -
-                        </div>
+                        <div class="h5 mb-0 text-muted" *ngIf="!goal.days_remaining || goal.days_remaining <= 0">-</div>
                       </div>
                     </div>
                   </div>
-
-                  <!-- Deadline & Actions -->
                   <div class="mt-3 d-flex justify-content-between align-items-center">
-                    <small class="text-muted" *ngIf="goal.deadline">
-                      Deadline: {{goal.deadline | date:'mediumDate'}}
-                    </small>
-                    <small class="text-muted" *ngIf="!goal.deadline">
-                      No deadline set
-                    </small>
+                    <small class="text-muted" *ngIf="goal.deadline">Deadline: {{ goal.deadline | date:'mediumDate' }}</small>
+                    <small class="text-muted" *ngIf="!goal.deadline">No deadline set</small>
                     <div>
-                      <button class="btn btn-sm btn-outline-primary mr-2" 
+                      <button class="btn btn-sm btn-outline-primary mr-2"
                               (click)="onUpdateGoalProgress(goal.id)"
                               *ngIf="goal.status === 'active'">
                         <i class="fas fa-sync-alt"></i>
                       </button>
-                      <button class="btn btn-sm btn-outline-danger" 
-                              (click)="onDeleteGoal(goal.id)">
+                      <button class="btn btn-sm btn-outline-danger" (click)="onDeleteGoal(goal.id)">
                         <i class="fas fa-trash"></i>
                       </button>
                     </div>
@@ -405,50 +383,42 @@
         </div>
         <div class="card-body">
           <div class="row">
-            <!-- Progress Summary Card -->
             <div class="col-md-4">
               <div class="card border-primary">
                 <div class="card-body text-center">
                   <i class="fas fa-trophy fa-2x text-primary mb-3"></i>
-                  <h3>{{getCompletedGoalsCount()}}/{{goals.length}}</h3>
+                  <h3>{{ getCompletedGoalsCount() }}/{{ goals.length }}</h3>
                   <p class="text-muted">Goals Completed</p>
                   <div class="progress">
-                    <div class="progress-bar bg-primary" 
+                    <div class="progress-bar bg-primary"
                          [style.width]="(getCompletedGoalsCount() / goals.length * 100) + '%'">
-                      {{(getCompletedGoalsCount() / goals.length * 100) | number:'1.0-0'}}%
+                      {{ (getCompletedGoalsCount() / goals.length * 100) | number:'1.0-0' }}%
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            
-            <!-- Average Progress Card -->
             <div class="col-md-4">
               <div class="card border-success">
                 <div class="card-body text-center">
                   <i class="fas fa-chart-line fa-2x text-success mb-3"></i>
-                  <h3>{{getAverageProgress() | number:'1.0-0'}}%</h3>
+                  <h3>{{ getAverageProgress() | number:'1.0-0' }}%</h3>
                   <p class="text-muted">Average Progress</p>
                   <div class="progress">
-                    <div class="progress-bar bg-success" 
-                         [style.width]="getAverageProgress() + '%'">
-                      {{getAverageProgress() | number:'1.0-0'}}%
+                    <div class="progress-bar bg-success" [style.width]="getAverageProgress() + '%'">
+                      {{ getAverageProgress() | number:'1.0-0' }}%
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            
-            <!-- Active Goals Card -->
             <div class="col-md-4">
               <div class="card border-info">
                 <div class="card-body text-center">
                   <i class="fas fa-running fa-2x text-info mb-3"></i>
-                  <h3>{{getActiveGoalsCount()}}</h3>
+                  <h3>{{ getActiveGoalsCount() }}</h3>
                   <p class="text-muted">Active Goals</p>
-                  <small class="text-muted">
-                    {{getTotalRemainingAmount() | currency}} left to achieve
-                  </small>
+                  <small class="text-muted">{{ getTotalRemainingAmount() | currency }} left to achieve</small>
                 </div>
               </div>
             </div>
@@ -461,27 +431,27 @@
   <!-- Charts Section -->
   <div class="row mb-4">
     <div class="col-12">
-      <app-balance-chart 
+      <app-profit-loss-chart
         *ngIf="campaign"
         [campaign]="campaign"
-        [transactions]="filteredTransactions"
         [bets]="filteredBets"
-        [useFilteredData]="false">
-      </app-balance-chart>
+        [transactions]="filteredTransactions"
+        [useFilteredData]="true">
+      </app-profit-loss-chart>
     </div>
   </div>
 
   <!-- Action Section -->
   <div class="row mb-5">
     <div class="col-md-6">
-      <app-transaction-create 
-        [campaignId]="campaign.id" 
+      <app-transaction-create
+        [campaignId]="campaign.id"
         (transactionAdded)="onTransactionAdded()">
       </app-transaction-create>
     </div>
     <div class="col-md-6">
-      <app-bet-create 
-        [campaignId]="campaign.id" 
+      <app-bet-create
+        [campaignId]="campaign.id"
         [currentBalance]="campaign.current_balance"
         (betPlaced)="onBetPlaced()">
       </app-bet-create>
@@ -490,6 +460,7 @@
 
   <!-- History Section -->
   <div class="row">
+    <!-- Transaction History -->
     <div class="col-md-6">
       <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -498,12 +469,10 @@
             Transaction History
             <span class="badge bg-secondary ms-2">{{ filterDescription }}</span>
           </h5>
-          <span class="badge bg-primary">
-            {{ filteredTransactions.length }} Transactions
-          </span>
+          <span class="badge bg-primary">{{ filteredTransactions.length }} Transactions</span>
         </div>
         <div class="card-body">
-          <app-transaction-list 
+          <app-transaction-list
             [campaignId]="campaign.id"
             [useFilteredData]="true"
             (transactionAdded)="onTransactionAdded()">
@@ -511,26 +480,222 @@
         </div>
       </div>
     </div>
-    
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BETTING HISTORY — Desktop table + Mobile cards + Pagination
+         ═══════════════════════════════════════════════════════════ -->
     <div class="col-md-6">
       <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
           <h5 class="mb-0">
             <i class="fas fa-trophy me-2 text-warning"></i>
             Betting History
             <span class="badge bg-secondary ms-2">{{ filterDescription }}</span>
           </h5>
-          <span class="badge bg-warning">
-            {{ filteredBets.length }} Bets
-          </span>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-warning">{{ filteredBets.length }} Bets</span>
+          </div>
         </div>
-        <div class="card-body">
-          <app-bet-list 
-            [campaignId]="campaign.id"
-            [useFilteredData]="true"
-            (betPlaced)="onBetPlaced()">
-          </app-bet-list>
-        </div>
+
+        <div class="card-body p-0">
+
+          <!-- ── Filter & Sort toolbar ── -->
+          <div class="bets-toolbar px-3 py-2 border-bottom">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+              <!-- Result filter chips -->
+              <div class="filter-chips">
+                <button class="chip" [class.chip-active]="betResultFilter === 'all'"
+                        (click)="setBetFilter('all')">All</button>
+                <button class="chip chip-win"  [class.chip-active]="betResultFilter === 'win'"
+                        (click)="setBetFilter('win')">Won</button>
+                <button class="chip chip-loss" [class.chip-active]="betResultFilter === 'loss'"
+                        (click)="setBetFilter('loss')">Lost</button>
+                <button class="chip chip-pending" [class.chip-active]="betResultFilter === 'pending'"
+                        (click)="setBetFilter('pending')">Pending</button>
+                <button class="chip chip-void" [class.chip-active]="betResultFilter === 'void'"
+                        (click)="setBetFilter('void')">Void</button>
+              </div>
+
+              <!-- Spacer -->
+              <div class="ms-auto d-flex align-items-center gap-2">
+                <!-- Sort -->
+                <select class="form-select form-select-sm sort-select"
+                        [(ngModel)]="betSortField"
+                        (ngModelChange)="onSortChange()">
+                  <option value="date_desc">Newest first</option>
+                  <option value="date_asc">Oldest first</option>
+                  <option value="profit_desc">Highest profit</option>
+                  <option value="profit_asc">Lowest profit</option>
+                  <option value="stake_desc">Highest stake</option>
+                </select>
+                <!-- Page size -->
+                <select class="form-select form-select-sm sort-select"
+                        [(ngModel)]="betPageSize"
+                        (ngModelChange)="onBetPageSizeChange()">
+                  <option [value]="5">5 / page</option>
+                  <option [value]="10">10 / page</option>
+                  <option [value]="20">20 / page</option>
+                  <option [value]="50">50 / page</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── DESKTOP TABLE (md and up) ── -->
+          <div class="d-none d-md-block">
+            <div class="table-responsive">
+              <table class="table table-hover bets-desktop-table mb-0" *ngIf="pagedBets.length > 0; else noDesktopBets">
+                <thead>
+                  <tr>
+                    <th>Sport</th>
+                    <th>Odds</th>
+                    <th class="text-end">Stake</th>
+                    <th class="text-end">P/L</th>
+                    <th class="text-center">Result</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let bet of pagedBets" class="bet-row">
+                    <td>
+                      <span class="sport-icon me-1">{{ getSportIcon(bet.sport) }}</span>
+                      <span class="sport-name">{{ bet.sport | titlecase }}</span>
+                    </td>
+                    <td class="odds-cell">{{ bet.odds | number:'1.2-2' }}</td>
+                    <td class="text-end">{{ bet.stake | currencyFormat }}</td>
+                    <td class="text-end fw-semibold"
+                        [ngClass]="bet.profit_loss > 0 ? 'text-success' : bet.profit_loss < 0 ? 'text-danger' : 'text-muted'">
+                      {{ bet.profit_loss >= 0 ? '+' : '' }}{{ bet.profit_loss | currencyFormat }}
+                    </td>
+                    <td class="text-center">
+                      <span class="result-pill" [ngClass]="'result-' + bet.result">
+                        {{ bet.result | titlecase }}
+                      </span>
+                    </td>
+                    <td class="date-cell text-muted">{{ bet.created_at | date:'MMM d, HH:mm' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <ng-template #noDesktopBets>
+                <div class="text-center py-5">
+                  <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                  <p class="text-muted">No bets match the current filter</p>
+                </div>
+              </ng-template>
+            </div>
+          </div>
+
+          <!-- ── MOBILE CARDS (below md) ── -->
+          <div class="d-md-none">
+            <div *ngIf="pagedBets.length > 0; else noMobileBets">
+              <div *ngFor="let bet of pagedBets; let i = index"
+                   class="mobile-bet-card"
+                   [class.mobile-bet-win]="bet.result === 'win'"
+                   [class.mobile-bet-loss]="bet.result === 'loss'"
+                   [class.mobile-bet-pending]="bet.result === 'pending'"
+                   [class.mobile-bet-void]="bet.result === 'void'">
+
+                <!-- Card top row: sport + result pill -->
+                <div class="mbc-top">
+                  <div class="mbc-sport">
+                    <span class="mbc-sport-icon">{{ getSportIcon(bet.sport) }}</span>
+                    <span class="mbc-sport-name">{{ bet.sport | titlecase }}</span>
+                  </div>
+                  <span class="result-pill" [ngClass]="'result-' + bet.result">
+                    {{ bet.result | titlecase }}
+                  </span>
+                </div>
+
+                <!-- Card middle: P/L prominent -->
+                <div class="mbc-pl"
+                     [ngClass]="bet.profit_loss > 0 ? 'mbc-pl-win' : bet.profit_loss < 0 ? 'mbc-pl-loss' : 'mbc-pl-neutral'">
+                  {{ bet.profit_loss >= 0 ? '+' : '' }}{{ bet.profit_loss | currencyFormat }}
+                </div>
+
+                <!-- Card stats row -->
+                <div class="mbc-stats">
+                  <div class="mbc-stat">
+                    <span class="mbc-stat-label">Stake</span>
+                    <span class="mbc-stat-value">{{ bet.stake | currencyFormat }}</span>
+                  </div>
+                  <div class="mbc-stat-divider"></div>
+                  <div class="mbc-stat">
+                    <span class="mbc-stat-label">Odds</span>
+                    <span class="mbc-stat-value">{{ bet.odds | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="mbc-stat-divider"></div>
+                  <div class="mbc-stat">
+                    <span class="mbc-stat-label">ROI</span>
+                    <span class="mbc-stat-value"
+                          [ngClass]="bet.profit_loss > 0 ? 'text-success' : bet.profit_loss < 0 ? 'text-danger' : ''">
+                      {{ bet.stake > 0 ? ((bet.profit_loss / bet.stake) * 100 | number:'1.1-1') : '0' }}%
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Card footer: date -->
+                <div class="mbc-footer">
+                  <i class="fas fa-clock me-1"></i>
+                  {{ bet.created_at | date:'MMM d, y — HH:mm' }}
+                </div>
+              </div>
+            </div>
+            <ng-template #noMobileBets>
+              <div class="text-center py-5">
+                <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No bets match the current filter</p>
+              </div>
+            </ng-template>
+          </div>
+
+          <!-- ── PAGINATION ── shown for both desktop and mobile -->
+          <div class="bets-pagination" *ngIf="betTotalPages > 1">
+            <div class="pagination-info">
+              Showing {{ betPageStart }}–{{ betPageEnd }} of {{ filteredAndSortedBets.length }}
+            </div>
+            <div class="pagination-controls">
+              <!-- First -->
+              <button class="pg-btn" (click)="setBetPage(1)" [disabled]="betCurrentPage === 1"
+                      title="First page">
+                <i class="fas fa-angle-double-left"></i>
+              </button>
+              <!-- Prev -->
+              <button class="pg-btn" (click)="setBetPage(betCurrentPage - 1)" [disabled]="betCurrentPage === 1"
+                      title="Previous page">
+                <i class="fas fa-angle-left"></i>
+              </button>
+
+              <!-- Page number pills -->
+              <ng-container *ngFor="let p of betPageNumbers">
+                <span class="pg-ellipsis" *ngIf="p === -1">…</span>
+                <button class="pg-btn pg-num" *ngIf="p !== -1"
+                        [class.pg-active]="p === betCurrentPage"
+                        (click)="setBetPage(p)">{{ p }}</button>
+              </ng-container>
+
+              <!-- Next -->
+              <button class="pg-btn" (click)="setBetPage(betCurrentPage + 1)" [disabled]="betCurrentPage === betTotalPages"
+                      title="Next page">
+                <i class="fas fa-angle-right"></i>
+              </button>
+              <!-- Last -->
+              <button class="pg-btn" (click)="setBetPage(betTotalPages)" [disabled]="betCurrentPage === betTotalPages"
+                      title="Last page">
+                <i class="fas fa-angle-double-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Totals footer -->
+          <div class="bets-footer-summary" *ngIf="filteredAndSortedBets.length > 0">
+            <span>{{ filteredAndSortedBets.length }} bets</span>
+            <span>Staked: <strong>{{ getFilteredTotalStake() | currencyFormat }}</strong></span>
+            <span [ngClass]="getFilteredTotalPL() >= 0 ? 'text-success' : 'text-danger'">
+              P/L: <strong>{{ getFilteredTotalPL() >= 0 ? '+' : '' }}{{ getFilteredTotalPL() | currencyFormat }}</strong>
+            </span>
+          </div>
+
+        </div><!-- /card-body -->
       </div>
     </div>
   </div>
