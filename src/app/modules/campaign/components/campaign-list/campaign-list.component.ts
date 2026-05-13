@@ -1,12 +1,12 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ChartConfiguration } from 'chart.js';
 import { Router } from '@angular/router';
-import { CampaignService, Campaign } from '../../services/campaign.service';
+import { CampaignService, Campaign, CampaignStats } from '../../services/campaign.service';
 import { BetService, Bet } from '../../services/bet.service';
 import { CurrencyService } from '../../services/currency.service';
 
-interface CampaignStats {
+interface CampaignStatsData {
   totalProfitLoss: number;
   totalStaked: number;
   totalBets: number;
@@ -37,80 +37,50 @@ interface CasinoStats {
   losses: number;
 }
 
-// ─── Sport icon mapping ───────────────────────────────────────────────────────
 const SPORT_ICONS: Record<string, string> = {
-  // Football / Soccer variants
   football: '⚽',
   soccer: '⚽',
   'football (cl)': '⚽',
   'football/basketball': '⚽🏀',
-  // Basketball
   basketball: '🏀',
-  // Tennis
   tennis: '🎾',
-  // Baseball
   baseball: '⚾',
-  // American Football
   'american football': '🏈',
   nfl: '🏈',
-  // Rugby
   rugby: '🏉',
-  // Hockey / Ice Hockey
   hockey: '🏒',
   'ice hockey': '🏒',
-  // Boxing / MMA
   boxing: '🥊',
   mma: '🥋',
-  // Golf
   golf: '⛳',
-  // Volleyball
   volleyball: '🏐',
-  // Cricket
   cricket: '🏏',
-  // Table Tennis
   'table tennis': '🏓',
-  // Cycling
   cycling: '🚴',
-  // Swimming
   swimming: '🏊',
-  // Athletics / Running
   athletics: '🏃',
   running: '🏃',
-  // Casino
   casino: '🎰',
   slots: '🎰',
-  // Esports
   esports: '🎮',
-  // Horse Racing
   'horse racing': '🐎',
   horses: '🐎',
-  // Darts
   darts: '🎯',
-  // Snooker / Billiards
   snooker: '🎱',
   billiards: '🎱',
-  // Bonus / Special
   'bonus staked': '🎁',
   bonus: '🎁',
-  // Lucky / Special campaigns
   'lucky friday': '🍀',
   lucky: '🍀',
-  // Default
   unknown: '🏅',
 };
 
-/**
- * Returns the best-matching emoji for a given sport name.
- * Tries exact match first, then partial/keyword match, then falls back to 🏅.
- */
 function getSportIcon(sport: string): string {
   if (!sport) return '🏅';
   const lower = sport.toLowerCase().trim();
 
-  // Exact match
   if (SPORT_ICONS[lower]) return SPORT_ICONS[lower];
 
-  // Partial match — iterate keys, pick first that is contained in the sport name
   for (const key of Object.keys(SPORT_ICONS)) {
     if (lower.includes(key) || key.includes(lower)) {
       return SPORT_ICONS[key];
@@ -124,18 +94,19 @@ function getSportIcon(sport: string): string {
   selector: 'app-campaign-list',
   templateUrl: './campaign-list.component.html',
   styleUrls: ['./campaign-list.component.scss'],
-  // Using Default (not OnPush) so Angular updates normally,
-  // but we manually control when chart data is rebuilt.
 })
 export class CampaignListComponent implements OnInit, OnDestroy {
   campaigns: Campaign[] = [];
+  campaignsStats: Map<number, CampaignStats> = new Map();
   allBets: Bet[] = [];
   filteredBets: Bet[] = [];
   showAllBets: boolean = false;
   chartView: 'cumulative' | 'daily' | 'both' = 'both';
   activeTab: string = 'sports';
-
-  stats: CampaignStats = {
+  expandedCampaignId: number | null = null;
+comparisonMetric: string = 'profit_loss'; // profit_loss, total_bets, win_rate, roi, balance_usage
+campaignsWithStats: any[] = [];
+  stats: CampaignStatsData = {
     totalProfitLoss: 0,
     totalStaked: 0,
     totalBets: 0,
@@ -146,7 +117,7 @@ export class CampaignListComponent implements OnInit, OnDestroy {
     void: 0,
   };
 
-  regularBetsStats: CampaignStats = {
+  regularBetsStats: CampaignStatsData = {
     totalProfitLoss: 0,
     totalStaked: 0,
     totalBets: 0,
@@ -170,7 +141,6 @@ export class CampaignListComponent implements OnInit, OnDestroy {
 
   winLossStats = { wins: 0, losses: 0 };
 
-  // ── Date / Time ──────────────────────────────────────────────────────────────
   currentDate: Date = new Date();
   currentTime: string = '';
   dayOfYear: number = 0;
@@ -179,7 +149,6 @@ export class CampaignListComponent implements OnInit, OnDestroy {
   timezone: string = '';
   private timeInterval: any;
 
-  // ── Filters ──────────────────────────────────────────────────────────────────
   filterForm: FormGroup;
   timeFilters = [
     { value: 'all', label: 'All Time' },
@@ -209,11 +178,61 @@ export class CampaignListComponent implements OnInit, OnDestroy {
   selectedStartDate: Date | null = null;
   selectedEndDate: Date | null = null;
 
-  // ── Chart — stored as a property so the template doesn't call a method ───────
-  // This is the KEY fix: the template binds to `chartData` (a property),
-  // not to `getChartData()` (a method), so Chart.js won't re-render on every
-  // change-detection tick triggered by the 1-second timer.
   public chartData!: ChartConfiguration<'line'>['data'];
+public campaignComparisonChartData: ChartConfiguration<'bar'>['data'] = {
+  labels: [],
+  datasets: []
+};
+
+public campaignComparisonChartOptions: ChartConfiguration<'bar'>['options'] = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: true,
+      position: 'top',
+    },
+    tooltip: {
+      callbacks: {
+        label: (context) => {
+          const value = context.parsed.y;
+          const metric = this.comparisonMetric;          if (metric === 'profit_loss') {
+            return `Profit/Loss: ${value && value >= 0 ? '+' : ''}${this.currencyService.formatCurrency(value || 0)}`;
+          } else if (metric === 'total_bets') {
+            return `Total Bets: ${value || 0}`;
+          } else if (metric === 'win_rate') {
+            return `Win Rate: ${value || 0}%`;
+          } else if (metric === 'roi') {
+            return `ROI: ${value || 0}%`;
+          } else if (metric === 'balance_usage') {
+            return `Balance Usage: ${value || 0}%`;
+          }
+          return `${value || 0}`;
+        }
+      }
+    }
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      title: {
+        display: true,
+        text: ''
+      },
+      ticks: {
+        callback: (value) => {
+          if (this.comparisonMetric === 'profit_loss') {
+            return this.currencyService.formatCurrency(value as number);
+          } else if (this.comparisonMetric === 'win_rate' || this.comparisonMetric === 'roi' || this.comparisonMetric === 'balance_usage') {
+            return `${value}%`;
+          }
+          return value;
+        }
+      }
+    }
+  }
+};
+
 
   public profitLossChartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
@@ -272,7 +291,6 @@ export class CampaignListComponent implements OnInit, OnDestroy {
     },
   };
 
-  // ── Mobile ───────────────────────────────────────────────────────────────────
   mobileResultFilter: string = 'all';
   mobileSortBy: string = 'date';
   mobileCurrentPage: number = 1;
@@ -280,7 +298,6 @@ export class CampaignListComponent implements OnInit, OnDestroy {
   mobileTotalPages: number = 1;
   mobileBets: Bet[] = [];
 
-  // ── Internal chart state ─────────────────────────────────────────────────────
   private cumulativeData: number[] = [];
   private dailyData: number[] = [];
   private chartLabels: string[] = [];
@@ -298,7 +315,6 @@ export class CampaignListComponent implements OnInit, OnDestroy {
       monthFilter: ['all'],
     });
 
-    // Initialise chart data so binding is never undefined
     this.chartData = { labels: [], datasets: [] };
   }
 
@@ -319,32 +335,324 @@ export class CampaignListComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ── DateTime ─────────────────────────────────────────────────────────────────
-
   initDateTime(): void {
     this.updateDateTime();
     this.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   }
 
   startDateTimeUpdate(): void {
-    // Only update time-related fields — NOT chart data — every second.
     this.timeInterval = setInterval(() => {
       this.updateDateTimeOnly();
     }, 1000);
   }
+updateCampaignsWithStats(): void {
+  this.campaignsWithStats = this.campaigns.map(campaign => ({
+    ...campaign,
+    stats: this.campaignsStats.get(campaign.id)
+  })).filter(c => c.stats); // Only show campaigns with stats
+  if (this.campaignsWithStats.length > 0) {
+    this.updateComparisonChart();
+  }
+}
 
-  /**
-   * Full update (called once at init, and whenever bets/filters change).
-   */
+// Fix the updateComparisonChart method - replace the entire method with this:
+
+updateComparisonChart(): void {
+  const labels = this.campaignsWithStats.map(c => c.name);
+  let data: number[] = [];
+  let label = '';
+  let backgroundColor = '';
+
+  switch(this.comparisonMetric) {
+    case 'profit_loss':
+      data = this.campaignsWithStats.map(c => c.stats?.total_profit_loss || 0);
+      label = 'Profit / Loss';
+      backgroundColor = 'rgba(40, 167, 69, 0.7)';
+      break;
+    case 'total_bets':
+      data = this.campaignsWithStats.map(c => c.stats?.total_bets || 0);
+      label = 'Total Bets';
+      backgroundColor = 'rgba(52, 152, 219, 0.7)';
+      break;
+    case 'win_rate':
+      data = this.campaignsWithStats.map(c => c.stats?.win_rate || 0);
+      label = 'Win Rate (%)';
+      backgroundColor = 'rgba(255, 193, 7, 0.7)';
+      break;
+    case 'roi':
+      data = this.campaignsWithStats.map(c => c.stats?.roi || 0);
+      label = 'ROI (%)';
+      backgroundColor = 'rgba(23, 162, 184, 0.7)';
+      break;
+    case 'balance_usage':
+      data = this.campaignsWithStats.map(c => c.stats?.balance_utilization || 0);
+      label = 'Balance Usage (%)';
+      backgroundColor = 'rgba(111, 66, 193, 0.7)';
+      break;
+  }
+
+  this.campaignComparisonChartData = {
+    labels: labels,
+    datasets: [{
+      label: label,
+      data: data,
+      backgroundColor: backgroundColor,
+      borderColor: backgroundColor.replace('0.7', '1'),
+      borderWidth: 1,
+      borderRadius: 4,
+      barPercentage: 0.7,
+      categoryPercentage: 0.8
+    }]
+  };
+
+  // Safely update the y-axis title
+  if (this.campaignComparisonChartOptions && 
+      this.campaignComparisonChartOptions.scales && 
+      this.campaignComparisonChartOptions.scales['y']) {
+    const yScale = this.campaignComparisonChartOptions.scales['y'];
+    if (yScale && yScale.title) {
+      yScale.title.text = this.getMetricLabel();
+    }
+  }
+}
+
+setComparisonMetric(metric: string): void {
+  this.comparisonMetric = metric;
+  this.updateComparisonChart();
+}
+
+getMetricLabel(): string {
+  switch(this.comparisonMetric) {
+    case 'profit_loss': return 'Profit / Loss';
+    case 'total_bets': return 'Number of Bets';
+    case 'win_rate': return 'Win Rate (%)';
+    case 'roi': return 'ROI (%)';
+    case 'balance_usage': return 'Balance Usage (%)';
+    default: return '';
+  }
+}
+
+getMetricUnit(): string {
+  switch(this.comparisonMetric) {
+    case 'profit_loss': return '';
+    case 'total_bets': return 'bets';
+    case 'win_rate': return '%';
+    case 'roi': return '%';
+    case 'balance_usage': return '%';
+    default: return '';
+  }
+}
+
+getBestCampaignMetric(): string {
+  return this.getMetricLabel();
+}
+
+getBestCampaignName(): string {
+  if (this.campaignsWithStats.length === 0) return '-';
+  
+  let bestCampaign = this.campaignsWithStats[0];
+  let bestValue = -Infinity;
+  
+  for (const campaign of this.campaignsWithStats) {
+    let currentValue = 0;
+    
+    switch(this.comparisonMetric) {
+      case 'profit_loss':
+        currentValue = campaign.stats?.total_profit_loss || 0;
+        break;
+      case 'total_bets':
+        currentValue = campaign.stats?.total_bets || 0;
+        break;
+      case 'win_rate':
+        currentValue = campaign.stats?.win_rate || 0;
+        break;
+      case 'roi':
+        currentValue = campaign.stats?.roi || 0;
+        break;
+      case 'balance_usage':
+        currentValue = campaign.stats?.balance_utilization || 0;
+        break;
+    }
+    
+    if (currentValue > bestValue) {
+      bestValue = currentValue;
+      bestCampaign = campaign;
+    }
+  }
+  
+  return bestCampaign.name;
+}
+
+getBestCampaignValue(): number {
+  if (this.campaignsWithStats.length === 0) return 0;
+  
+  let bestValue = -Infinity;
+  for (const campaign of this.campaignsWithStats) {
+    let value = 0;
+    switch(this.comparisonMetric) {
+      case 'profit_loss':
+        value = campaign.stats?.total_profit_loss || 0;
+        break;
+      case 'total_bets':
+        value = campaign.stats?.total_bets || 0;
+        break;
+      case 'win_rate':
+        value = campaign.stats?.win_rate || 0;
+        break;
+      case 'roi':
+        value = campaign.stats?.roi || 0;
+        break;
+      case 'balance_usage':
+        value = campaign.stats?.balance_utilization || 0;
+        break;
+    }
+    if (value > bestValue) bestValue = value;
+  }
+  
+  return bestValue === -Infinity ? 0 : bestValue;
+}
+
+getAverageMetricValue(): number {
+  if (this.campaignsWithStats.length === 0) return 0;
+  
+  let sum = 0;
+  let count = 0;
+  for (const campaign of this.campaignsWithStats) {
+    switch(this.comparisonMetric) {
+      case 'profit_loss':
+        if (campaign.stats?.total_profit_loss !== undefined) {
+          sum += campaign.stats.total_profit_loss;
+          count++;
+        }
+        break;
+      case 'total_bets':
+        sum += campaign.stats?.total_bets || 0;
+        count++;
+        break;
+      case 'win_rate':
+        sum += campaign.stats?.win_rate || 0;
+        count++;
+        break;
+      case 'roi':
+        if (campaign.stats?.roi !== undefined) {
+          sum += campaign.stats.roi;
+          count++;
+        }
+        break;
+      case 'balance_usage':
+        sum += campaign.stats?.balance_utilization || 0;
+        count++;
+        break;
+    }
+  }
+  
+  return count > 0 ? sum / count : 0;
+}
+
+getActiveCampaignsCount(): number {
+  return this.campaignsWithStats.filter(c => (c.stats?.total_bets || 0) > 0).length;
+}
+
+getPerformanceBarWidth(campaign: any): number {
+  if (!campaign.stats) return 0;
+  
+  // Find max value for normalization
+  let maxValue = 0;
+  for (const c of this.campaignsWithStats) {
+    if (!c.stats) continue;
+    let value = 0;
+    switch(this.comparisonMetric) {
+      case 'profit_loss':
+        value = Math.abs(c.stats.total_profit_loss || 0);
+        break;
+      case 'total_bets':
+        value = c.stats.total_bets || 0;
+        break;
+      case 'win_rate':
+        value = c.stats.win_rate || 0;
+        break;
+      case 'roi':
+        value = Math.abs(c.stats.roi || 0);
+        break;
+      case 'balance_usage':
+        value = c.stats.balance_utilization || 0;
+        break;
+    }
+    if (value > maxValue) maxValue = value;
+  }
+  
+  if (maxValue === 0) return 0;
+  
+  let currentValue = 0;
+  switch(this.comparisonMetric) {
+    case 'profit_loss':
+      currentValue = Math.abs(campaign.stats.total_profit_loss || 0);
+      break;
+    case 'total_bets':
+      currentValue = campaign.stats.total_bets || 0;
+      break;
+    case 'win_rate':
+      currentValue = campaign.stats.win_rate || 0;
+      break;
+    case 'roi':
+      currentValue = Math.abs(campaign.stats.roi || 0);
+      break;
+    case 'balance_usage':
+      currentValue = campaign.stats.balance_utilization || 0;
+      break;
+  }
+  
+  return (currentValue / maxValue) * 100;
+}
+
+getTotalProfitLossAllCampaigns(): number {
+  return this.campaignsWithStats.reduce((sum, c) => {
+    return sum + (c.stats?.total_profit_loss || 0);
+  }, 0);
+}
+
+getTotalBetsAllCampaigns(): number {
+  return this.campaignsWithStats.reduce((sum, c) => {
+    return sum + (c.stats?.total_bets || 0);
+  }, 0);
+}
+
+getAverageWinRateAllCampaigns(): number {
+  const totalBets = this.getTotalBetsAllCampaigns();
+  if (totalBets === 0) return 0;
+  
+  let weightedWins = 0;
+  for (const campaign of this.campaignsWithStats) {
+    weightedWins += (campaign.stats?.wins || 0);
+  }
+  
+  return (weightedWins / totalBets) * 100;
+}
+
+getTotalBalanceAllCampaigns(): number {
+  return this.campaigns.reduce((sum, c) => sum + (c.current_balance || 0), 0);
+}
+
+
+// Update the loadAllCampaignsStats method to also update campaignsWithStats
+loadAllCampaignsStats(): void {
+  this.campaignService.getAllCampaignsStats().subscribe({
+    next: (stats) => {
+      stats.forEach(stat => {
+        this.campaignsStats.set(stat.campaign_id, stat);
+      });
+      this.updateCampaignsWithStats();
+      this.cdr.detectChanges();
+    },
+    error: (error) => {
+      console.error('Error loading campaign stats:', error);
+    }
+  });
+}
   updateDateTime(): void {
     this.updateDateTimeOnly();
   }
 
-  /**
-   * Lightweight update called by the 1-second interval.
-   * Only touches currentDate / currentTime / dayOfYear / weekNumber.
-   * Does NOT touch chart data, so Chart.js is unaffected.
-   */
   updateDateTimeOnly(): void {
     const now = new Date();
     this.currentDate = now;
@@ -372,12 +680,31 @@ export class CampaignListComponent implements OnInit, OnDestroy {
     );
   }
 
-  // ── Data loading ─────────────────────────────────────────────────────────────
-
   loadCampaigns(): void {
     this.campaignService.getAll().subscribe((data) => {
       this.campaigns = data;
+      this.loadAllCampaignsStats();
     });
+  }
+
+  
+
+  getCampaignStats(campaignId: number): CampaignStats | undefined {
+    return this.campaignsStats.get(campaignId);
+  }
+
+  toggleCampaignStats(campaignId: number): void {
+    if (this.expandedCampaignId === campaignId) {
+      this.expandedCampaignId = null;
+    } else {
+      this.expandedCampaignId = campaignId;
+      if (!this.campaignsStats.has(campaignId)) {
+        this.campaignService.getCampaignStats(campaignId).subscribe(stat => {
+          this.campaignsStats.set(campaignId, stat);
+          this.cdr.detectChanges();
+        });
+      }
+    }
   }
 
   loadAllBets(): void {
@@ -386,8 +713,6 @@ export class CampaignListComponent implements OnInit, OnDestroy {
       this.applyFilters();
     });
   }
-
-  // ── Filtering ────────────────────────────────────────────────────────────────
 
   applyFilters(): void {
     let filtered = [...this.allBets];
@@ -430,16 +755,14 @@ export class CampaignListComponent implements OnInit, OnDestroy {
     this.filteredBets = filtered;
     this.calculateStats();
     this.updateWinLossChart();
-    this.prepareChartData();   // rebuilds cumulativeData / dailyData
-    this.rebuildChartData();   // commits to this.chartData (the bound property)
+    this.prepareChartData();
+    this.rebuildChartData();
 
     this.mobileResultFilter = 'all';
     this.mobileSortBy = 'date';
     this.mobileCurrentPage = 1;
     this.applyMobileFilters();
   }
-
-  // ── Stats ────────────────────────────────────────────────────────────────────
 
   calculateStats(): void {
     const allBets = this.filteredBets;
@@ -545,8 +868,6 @@ export class CampaignListComponent implements OnInit, OnDestroy {
     );
   }
 
-  // ── Chart ────────────────────────────────────────────────────────────────────
-
   updateWinLossChart(): void {
     this.winLossChartData = {
       labels: ['Wins', 'Losses'],
@@ -591,10 +912,6 @@ export class CampaignListComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Commit the current cumulative/daily arrays to `this.chartData`.
-   * Called only when bets or the view toggle change — NOT every second.
-   */
   rebuildChartData(): void {
     const datasets: any[] = [];
 
@@ -622,7 +939,6 @@ export class CampaignListComponent implements OnInit, OnDestroy {
       });
     }
 
-    // Assign a new object reference so Angular detects the change once
     this.chartData = {
       labels: [...this.chartLabels],
       datasets,
@@ -631,16 +947,12 @@ export class CampaignListComponent implements OnInit, OnDestroy {
 
   setChartView(view: 'cumulative' | 'daily' | 'both'): void {
     this.chartView = view;
-    this.rebuildChartData(); // only re-renders chart when user explicitly toggles
+    this.rebuildChartData();
   }
-
-  // ── Sport icon helper (used in template) ─────────────────────────────────────
 
   getSportIcon(sport: string): string {
     return getSportIcon(sport);
   }
-
-  // ── Misc handlers ────────────────────────────────────────────────────────────
 
   onDateChange(): void {
     if (this.selectedStartDate || this.selectedEndDate) {
@@ -730,8 +1042,6 @@ export class CampaignListComponent implements OnInit, OnDestroy {
   getTotalStaked(): number {
     return this.filteredBets.reduce((s, b) => s + b.stake, 0);
   }
-
-  // ── Pagination ───────────────────────────────────────────────────────────────
 
   get paginatedBets(): Bet[] {
     return this.filteredBets.slice(0, 50);

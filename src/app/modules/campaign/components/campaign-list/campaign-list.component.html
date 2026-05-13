@@ -86,6 +86,208 @@
     </div>
   </div>
 
+<!-- Campaign Comparison Analytics Section -->
+<div class="row mb-4" *ngIf="campaigns.length > 0">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header bg-white">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+          <div class="mb-2 mb-md-0">
+            <h5 class="mb-0">📊 Campaign Performance Comparison</h5>
+            <small class="text-muted">Analyze and compare campaign metrics</small>
+          </div>
+          <div class="btn-group btn-group-toggle flex-wrap" role="group" data-toggle="buttons">
+            <label class="btn btn-primary" 
+                   [class.active]="comparisonMetric === 'profit_loss'"
+                   [class.btn-outline-primary]="comparisonMetric !== 'profit_loss'"
+                   (click)="setComparisonMetric('profit_loss')">
+              <input type="radio" name="metric" autocomplete="off" [checked]="comparisonMetric === 'profit_loss'"> 💰 Profit/Loss
+            </label>
+            <label class="btn btn-primary" 
+                   [class.active]="comparisonMetric === 'total_bets'"
+                   [class.btn-outline-primary]="comparisonMetric !== 'total_bets'"
+                   (click)="setComparisonMetric('total_bets')">
+              <input type="radio" name="metric" autocomplete="off" [checked]="comparisonMetric === 'total_bets'"> 🎲 Total Bets
+            </label>
+            <label class="btn btn-primary" 
+                   [class.active]="comparisonMetric === 'win_rate'"
+                   [class.btn-outline-primary]="comparisonMetric !== 'win_rate'"
+                   (click)="setComparisonMetric('win_rate')">
+              <input type="radio" name="metric" autocomplete="off" [checked]="comparisonMetric === 'win_rate'"> 🏆 Win Rate
+            </label>
+            <label class="btn btn-primary" 
+                   [class.active]="comparisonMetric === 'roi'"
+                   [class.btn-outline-primary]="comparisonMetric !== 'roi'"
+                   (click)="setComparisonMetric('roi')">
+              <input type="radio" name="metric" autocomplete="off" [checked]="comparisonMetric === 'roi'"> 📈 ROI
+            </label>
+            <label class="btn btn-primary" 
+                   [class.active]="comparisonMetric === 'balance_usage'"
+                   [class.btn-outline-primary]="comparisonMetric !== 'balance_usage'"
+                   (click)="setComparisonMetric('balance_usage')">
+              <input type="radio" name="metric" autocomplete="off" [checked]="comparisonMetric === 'balance_usage'"> 💳 Balance Usage
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <!-- Main Chart -->
+        <div class="row">
+          <div class="col-lg-8">
+            <div class="chart-container" style="position: relative; height: 400px;">
+              <canvas baseChart
+                      [data]="campaignComparisonChartData"
+                      [options]="campaignComparisonChartOptions"
+                      [type]="'bar'"></canvas>
+            </div>
+          </div>
+          
+          <!-- Stats Summary Cards -->
+          <div class="col-lg-4">
+            <div class="row">
+              <div class="col-12 mb-3">
+                <div class="bg-light p-3 rounded border">
+                  <small class="text-muted d-block">🏆 Best Campaign ({{ getMetricLabel() }})</small>
+                  <h4 class="mb-0 text-success">{{ getBestCampaignName() }}</h4>
+                  <small class="text-muted">
+                    {{ getBestCampaignValue() | number:'1.1-1' }} {{ getMetricUnit() }}
+                  </small>
+                </div>
+              </div>
+              <div class="col-12 mb-3">
+                <div class="bg-light p-3 rounded border">
+                  <small class="text-muted d-block">📊 Average {{ getMetricLabel() }}</small>
+                  <h4 class="mb-0">{{ getAverageMetricValue() | number:'1.1-1' }} {{ getMetricUnit() }}</h4>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="bg-light p-3 rounded border">
+                  <small class="text-muted d-block">🎯 Total Campaigns Active</small>
+                  <h4 class="mb-0">{{ campaigns.length }}</h4>
+                  <small>{{ getActiveCampaignsCount() }} with bets</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campaign Metrics Table -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <h6 class="mb-3">Detailed Campaign Metrics</h6>
+            <div class="table-responsive">
+              <table class="table table-hover table-sm">
+                <thead>
+                  <tr>
+                    <th>Campaign</th>
+                    <th class="text-right">Profit/Loss</th>
+                    <th class="text-right">Total Bets</th>
+                    <th class="text-right">Win Rate</th>
+                    <th class="text-right">ROI</th>
+                    <th class="text-right">Balance Usage</th>
+                    <th class="text-right">Total Staked</th>
+                    <th class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let campaign of campaignsWithStats">
+                    <td>
+                      <strong>{{ campaign.name }}</strong>
+                      <div class="progress mt-1" style="height: 3px;">
+                        <div class="progress-bar" 
+                             [ngClass]="{'bg-success': campaign.stats?.total_profit_loss > 0, 'bg-danger': campaign.stats?.total_profit_loss < 0}"
+                             [style.width.%]="getPerformanceBarWidth(campaign)"></div>
+                      </div>
+                    </td>
+                    <td class="text-right">
+                      <span [ngClass]="{'text-success': campaign.stats?.total_profit_loss > 0, 'text-danger': campaign.stats?.total_profit_loss < 0}">
+                        {{ campaign.stats?.total_profit_loss >= 0 ? '+' : '' }}{{ campaign.stats?.total_profit_loss | currencyFormat }}
+                      </span>
+                    </td>
+                    <td class="text-right">
+                      <strong>{{ campaign.stats?.total_bets || 0 }}</strong>
+                    </td>
+                    <td class="text-right">
+                      <span [ngClass]="{'text-success': (campaign.stats?.win_rate || 0) >= 50, 'text-danger': (campaign.stats?.win_rate || 0) < 50}">
+                        {{ campaign.stats?.win_rate | number:'1.1-1' }}%
+                      </span>
+                    </td>
+                    <td class="text-right">
+                      <span [ngClass]="{'text-success': (campaign.stats?.roi || 0) > 0, 'text-danger': (campaign.stats?.roi || 0) < 0}">
+                        {{ campaign.stats?.roi >= 0 ? '+' : '' }}{{ campaign.stats?.roi | number:'1.1-1' }}%
+                      </span>
+                    </td>
+                    <td class="text-right">
+                      <span>{{ campaign.stats?.balance_utilization | number:'1.1-1' }}%</span>
+                      <div class="progress mt-1" style="height: 3px;">
+                        <div class="progress-bar bg-info" 
+                             [style.width.%]="campaign.stats?.balance_utilization || 0"></div>
+                      </div>
+                    </td>
+                    <td class="text-right">
+                      {{ campaign.stats?.total_staked | currencyFormat }}
+                    </td>
+                    <td class="text-center">
+                      <button class="btn btn-sm btn-outline-info" 
+                              (click)="viewCampaignDetails(campaign.id)"
+                              title="View Details">
+                        👁️
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats Cards Row -->
+        <div class="row mt-4">
+          <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card bg-primary text-white h-100">
+              <div class="card-body text-center">
+                <h6 class="card-title">Total Profit/Loss</h6>
+                <h3 class="mb-0">{{ getTotalProfitLossAllCampaigns() | currencyFormat }}</h3>
+                <small>Across all campaigns</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card bg-success text-white h-100">
+              <div class="card-body text-center">
+                <h6 class="card-title">Total Bets</h6>
+                <h3 class="mb-0">{{ getTotalBetsAllCampaigns() }}</h3>
+                <small>All campaigns combined</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card bg-info text-white h-100">
+              <div class="card-body text-center">
+                <h6 class="card-title">Avg Win Rate</h6>
+                <h3 class="mb-0">{{ getAverageWinRateAllCampaigns() | number:'1.1-1' }}%</h3>
+                <small>Weighted average</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card bg-warning text-white h-100">
+              <div class="card-body text-center">
+                <h6 class="card-title">Total Balance</h6>
+                <h3 class="mb-0">{{ getTotalBalanceAllCampaigns() | currencyFormat }}</h3>
+                <small>Current balance</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
   <!-- Profit/Loss Chart -->
   <div class="row mb-4" *ngIf="filteredBets.length > 0">
     <div class="col-12">
@@ -114,53 +316,66 @@
   <div class="row">
 
     <!-- Left Column: Campaigns List -->
-    <div class="col-lg-7 mb-4">
-      <div class="card h-100">
-        <div class="card-header bg-white">
-          <div class="d-flex justify-content-between align-items-center">
-            <h4 class="mb-0" style="color: var(--dark-color);">Campaigns</h4>
-            <span class="badge badge-primary badge-pill">{{ campaigns.length }} Total</span>
-          </div>
-        </div>
+  <!-- Left Column: Campaigns List -->
+<!-- Left Column: Campaigns List -->
+<div class="col-lg-7 mb-4">
+  <div class="card h-100">
+    <div class="card-header bg-white">
+      <div class="d-flex justify-content-between align-items-center">
+        <h4 class="mb-0" style="color: var(--dark-color);">Campaigns</h4>
+        <span class="badge badge-primary badge-pill">{{ campaigns.length }} Total</span>
+      </div>
+    </div>
 
-        <div class="card-body p-0" *ngIf="campaigns.length > 0; else noCampaigns">
-          <div class="list-group list-group-flush">
-            <div *ngFor="let campaign of campaigns" class="list-group-item p-3">
-              <div class="row align-items-center">
-                <div class="col-8">
-                  <div class="d-flex align-items-center">
-                    <div class="campaign-icon mr-3">
-                      <div class="rounded-circle bg-primary bg-opacity-10 p-3">
-                        <span style="font-size: 1.5rem;">🏆</span>
-                      </div>
+    <div class="card-body p-0" *ngIf="campaigns.length > 0; else noCampaigns">
+      <div class="list-group list-group-flush">
+        <div *ngFor="let campaign of campaigns" class="list-group-item p-0">
+          <!-- Campaign Header -->
+          <div class="p-3">
+            <div class="row align-items-center">
+              <div class="col-8">
+                <div class="d-flex align-items-center">
+                  <div class="campaign-icon mr-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                      <span style="font-size: 1.5rem;">🏆</span>
                     </div>
-                    <div>
-                      <h5 class="mb-1">{{ campaign.name }}</h5>
-                      <div class="d-flex flex-wrap gap-3">
-                        <small class="text-muted mr-3">
-                          <span>💰</span> Balance:
-                          <span [ngClass]="{'text-success': campaign.current_balance > 0, 'text-warning': campaign.current_balance <= 0}">
-                            {{ campaign.current_balance | currencyFormat }}
-                          </span>
-                        </small>
-                        <small class="text-muted mr-3">
-                          <span class="text-success">↑</span> {{ campaign.total_deposits | currencyFormat }}
-                        </small>
-                        <small class="text-muted">
-                          <span class="text-danger">↓</span> {{ campaign.total_withdrawals | currencyFormat }}
-                        </small>
-                      </div>
+                  </div>
+                  <div>
+                    <h5 class="mb-1">{{ campaign.name }}</h5>
+                    <div class="d-flex flex-wrap gap-3">
+                      <small class="text-muted mr-3">
+                        <span>💰</span> Balance:
+                        <span [ngClass]="{'text-success': campaign.current_balance > 0, 'text-warning': campaign.current_balance <= 0}">
+                          {{ campaign.current_balance | currencyFormat }}
+                        </span>
+                      </small>
+                      <small class="text-muted mr-3">
+                        <span class="text-success">↑</span> {{ campaign.total_deposits | currencyFormat }}
+                      </small>
+                      <small class="text-muted">
+                        <span class="text-danger">↓</span> {{ campaign.total_withdrawals | currencyFormat }}
+                      </small>
                     </div>
                   </div>
                 </div>
-                <div class="col-4 text-right">
-                  <div class="progress mb-2" style="height: 6px;">
-                    <div class="progress-bar bg-success"
-                         [style.width.%]="(campaign.current_balance / campaign.start_balance) * 100"></div>
-                  </div>
-                  <div class="d-flex justify-content-end align-items-center">
-                    <small class="text-muted mr-2">Start: {{ campaign.start_balance | currencyFormat }}</small>
-                    <button class="btn btn-sm btn-outline-primary" (click)="viewCampaignDetails(campaign.id)">
+              </div>
+              <div class="col-4 text-right">
+                <div class="progress mb-2" style="height: 6px;">
+                  <div class="progress-bar bg-success"
+                       [style.width.%]="(campaign.current_balance / campaign.start_balance) * 100"></div>
+                </div>
+                <div class="d-flex justify-content-end align-items-center">
+                  <small class="text-muted mr-2">Start: {{ campaign.start_balance | currencyFormat }}</small>
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-sm btn-outline-primary mr-1" 
+                            (click)="toggleCampaignStats(campaign.id); $event.stopPropagation()"
+                            [title]="expandedCampaignId === campaign.id ? 'Hide Stats' : 'Show Stats'">
+                      <i class="fas" [ngClass]="{'fa-chart-line': expandedCampaignId !== campaign.id, 'fa-chart-simple': expandedCampaignId === campaign.id}"></i>
+                      Stats
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary" 
+                            (click)="viewCampaignDetails(campaign.id); $event.stopPropagation()"
+                            title="View Details">
                       View →
                     </button>
                   </div>
@@ -168,20 +383,147 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <ng-template #noCampaigns>
-          <div class="card-body text-center py-5">
-            <div style="font-size: 4rem;">📊</div>
-            <h5 class="mb-3">No Campaigns Yet</h5>
-            <p class="text-muted mb-4">Start tracking your betting campaigns by creating your first one.</p>
-            <button class="btn btn-primary" routerLink="/campaigns/create">
-              <span>+</span> Create First Campaign
-            </button>
+          <!-- Expanded Stats Section -->
+          <div *ngIf="expandedCampaignId === campaign.id" class="campaign-stats-expanded p-3 bg-light" style="border-top: 1px solid #dee2e6;">
+            <div *ngIf="getCampaignStats(campaign.id) as stats" class="row">
+              <!-- Betting Stats -->
+              <div class="col-md-6 mb-3">
+                <h6 class="mb-3">📊 Betting Statistics</h6>
+                <div class="stats-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                  <div class="stat-item">
+                    <small class="text-muted d-block">Total Bets</small>
+                    <strong>{{ stats.total_bets }}</strong>
+                  </div>
+                  <div class="stat-item">
+                    <small class="text-muted d-block">Total Staked</small>
+                    <strong>{{ stats.total_staked | currencyFormat }}</strong>
+                  </div>
+                  <div class="stat-item">
+                    <small class="text-muted d-block">Total P/L</small>
+                    <strong [ngClass]="{'text-success': stats.total_profit_loss > 0, 'text-danger': stats.total_profit_loss < 0}">
+                      {{ stats.total_profit_loss >= 0 ? '+' : '' }}{{ stats.total_profit_loss | currencyFormat }}
+                    </strong>
+                  </div>
+                  <div class="stat-item">
+                    <small class="text-muted d-block">Win Rate</small>
+                    <strong>{{ stats.win_rate | number:'1.1-1' }}%</strong>
+                  </div>
+                  <div class="stat-item">
+                    <small class="text-muted d-block">ROI</small>
+                    <strong [ngClass]="{'text-success': stats.roi > 0, 'text-danger': stats.roi < 0}">
+                      {{ stats.roi >= 0 ? '+' : '' }}{{ stats.roi | number:'1.1-1' }}%
+                    </strong>
+                  </div>
+                  <div class="stat-item">
+                    <small class="text-muted d-block">Avg Odds</small>
+                    <strong>{{ stats.avg_odds | number:'1.2-2' }}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Win/Loss Breakdown -->
+              <div class="col-md-6 mb-3">
+                <h6 class="mb-3">🎯 Win/Loss Breakdown</h6>
+                <div class="winloss-stats">
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>Wins: <strong class="text-success">{{ stats.wins }}</strong></span>
+                    <span>Losses: <strong class="text-danger">{{ stats.losses }}</strong></span>
+                    <span>Pending: <strong class="text-warning">{{ stats.pending }}</strong></span>
+                    <span>Void: <strong class="text-secondary">{{ stats.void }}</strong></span>
+                  </div>
+                  <div class="progress mb-3" style="height: 8px;">
+                    <div class="progress-bar bg-success" 
+                         [style.width.%]="(stats.wins / stats.total_bets) * 100"
+                         *ngIf="stats.total_bets > 0"></div>
+                    <div class="progress-bar bg-danger" 
+                         [style.width.%]="(stats.losses / stats.total_bets) * 100"
+                         *ngIf="stats.total_bets > 0"></div>
+                    <div class="progress-bar bg-warning" 
+                         [style.width.%]="(stats.pending / stats.total_bets) * 100"
+                         *ngIf="stats.total_bets > 0"></div>
+                    <div class="progress-bar bg-secondary" 
+                         [style.width.%]="(stats.void / stats.total_bets) * 100"
+                         *ngIf="stats.total_bets > 0"></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-6">
+                      <small class="text-muted d-block">Biggest Win</small>
+                      <strong class="text-success">{{ stats.biggest_win | currencyFormat }}</strong>
+                    </div>
+                    <div class="col-6">
+                      <small class="text-muted d-block">Biggest Loss</small>
+                      <strong class="text-danger">{{ stats.biggest_loss | currencyFormat }}</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Financial Stats -->
+              <div class="col-md-12">
+                <hr>
+                <h6 class="mb-3">💰 Financial Metrics</h6>
+                <div class="stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                  <div class="stat-item">
+                    <small class="text-muted d-block">Start Balance</small>
+                    <strong>{{ stats.start_balance | currencyFormat }}</strong>
+                  </div>
+                  <div class="stat-item">
+                    <small class="text-muted d-block">Current Balance</small>
+                    <strong [ngClass]="{'text-success': stats.current_balance > stats.start_balance, 'text-danger': stats.current_balance < stats.start_balance}">
+                      {{ stats.current_balance | currencyFormat }}
+                    </strong>
+                  </div>
+                  <div class="stat-item">
+                    <small class="text-muted d-block">Total Deposits</small>
+                    <strong>{{ stats.deposits | currencyFormat }}</strong>
+                  </div>
+                  <div class="stat-item">
+                    <small class="text-muted d-block">Total Withdrawals</small>
+                    <strong>{{ stats.withdrawals | currencyFormat }}</strong>
+                  </div>
+                  <div class="stat-item">
+                    <small class="text-muted d-block">Net Flow</small>
+                    <strong [ngClass]="{'text-success': stats.net_flow > 0, 'text-danger': stats.net_flow < 0}">
+                      {{ stats.net_flow >= 0 ? '+' : '' }}{{ stats.net_flow | currencyFormat }}
+                    </strong>
+                  </div>
+                  <div class="stat-item">
+                    <small class="text-muted d-block">Balance Utilization</small>
+                    <strong>{{ stats.balance_utilization | number:'1.1-1' }}%</strong>
+                  </div>
+                  <div class="stat-item">
+                    <small class="text-muted d-block">Total Profit %</small>
+                    <strong [ngClass]="{'text-success': stats.profit_percentage > 0, 'text-danger': stats.profit_percentage < 0}">
+                      {{ stats.profit_percentage >= 0 ? '+' : '' }}{{ stats.profit_percentage | number:'1.1-1' }}%
+                    </strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="!getCampaignStats(campaign.id)" class="text-center py-3">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+              <span class="ml-2">Loading statistics...</span>
+            </div>
           </div>
-        </ng-template>
+        </div>
       </div>
     </div>
+
+    <ng-template #noCampaigns>
+      <div class="card-body text-center py-5">
+        <div style="font-size: 4rem;">📊</div>
+        <h5 class="mb-3">No Campaigns Yet</h5>
+        <p class="text-muted mb-4">Start tracking your betting campaigns by creating your first one.</p>
+        <button class="btn btn-primary" routerLink="/campaigns/create">
+          <span>+</span> Create First Campaign
+        </button>
+      </div>
+    </ng-template>
+  </div>
+</div>
 
     <!-- Right Column: Stats & Analytics -->
     <div class="col-lg-5 mb-4">
@@ -707,6 +1049,5 @@
 
       </div>
     </div>
-  </div>
-
+  </div> 
 </div>
