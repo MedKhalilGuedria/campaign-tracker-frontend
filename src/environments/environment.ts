@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://campaign-tracker-3-pn3v.onrender.com'
+  apiUrl: 'https://campaign-tracker-ljrl.onrender.com'
 };
