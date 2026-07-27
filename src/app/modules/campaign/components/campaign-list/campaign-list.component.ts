@@ -206,11 +206,21 @@ export class CampaignListComponent implements OnInit, OnDestroy {
       legend: {
         display: true,
         position: 'top',
+        labels: {
+          usePointStyle: true,
+          padding: 20,
+          font: {
+            size: 12
+          }
+        }
       },
       tooltip: {
         callbacks: {
           label: (context) => {
             const value = context.parsed.y;
+            if (context.dataset.label === 'Number of Bets') {
+              return `Number of Bets: ${Math.round(value || 0)}`;
+            }
             if (value == null) return 'Profit/Loss: 0';
             return `Profit/Loss: ${value >= 0 ? '+' : ''}${this.currencyService.formatCurrency(value || 0)}`;
           }
@@ -221,14 +231,24 @@ export class CampaignListComponent implements OnInit, OnDestroy {
       x: {
         title: {
           display: true,
-          text: 'Month'
+          text: 'Month',
+          font: {
+            weight: 'bold'
+          }
+        },
+        grid: {
+          display: false
         }
       },
       y: {
         beginAtZero: true,
+        position: 'left',
         title: {
           display: true,
-          text: 'Profit/Loss'
+          text: 'Profit/Loss',
+          font: {
+            weight: 'bold'
+          }
         },
         ticks: {
           callback: (value) => {
@@ -241,13 +261,19 @@ export class CampaignListComponent implements OnInit, OnDestroy {
         position: 'right',
         title: {
           display: true,
-          text: 'Number of Bets'
+          text: 'Number of Bets',
+          font: {
+            weight: 'bold'
+          }
         },
         grid: {
           drawOnChartArea: false
         },
         ticks: {
-          stepSize: 1
+          stepSize: 1,
+          callback: (value) => {
+            return Math.round(value as number);
+          }
         }
       }
     }
@@ -657,15 +683,20 @@ export class CampaignListComponent implements OnInit, OnDestroy {
           borderRadius: 4,
           barPercentage: 0.7,
           categoryPercentage: 0.8,
+          order: 1
         } as any,
         {
           label: 'Number of Bets',
           data: betCounts,
-          backgroundColor: 'rgba(52, 152, 219, 0.3)',
+          backgroundColor: 'rgba(52, 152, 219, 0.2)',
           borderColor: 'rgb(52, 152, 219)',
           borderWidth: 2,
           fill: false,
           tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: 'rgb(52, 152, 219)',
+          order: 0,
+          yAxisID: 'y1'
         } as any
       ]
     };

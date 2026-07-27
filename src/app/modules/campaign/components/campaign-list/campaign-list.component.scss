@@ -314,7 +314,7 @@
   }
 }
 
-// ===== TAB STYLING - COMPLETE FIX =====
+// ===== TAB STYLING =====
 // Container for tabs
 .tab-container {
   margin-bottom: 1.5rem;
@@ -414,8 +414,8 @@
   }
 }
 
-// ===== SPORT STATS SECTION =====
-.sport-stats-container {
+// ===== CATEGORY STATS SECTION =====
+.category-stats-container {
   margin-top: 1rem;
   
   .section-title {
@@ -429,7 +429,7 @@
   }
 }
 
-.sport-stats-list {
+.category-stats-list {
   max-height: 350px;
   overflow-y: auto;
   padding-right: 5px;
@@ -453,7 +453,7 @@
   }
 }
 
-.sport-stat-item {
+.category-stat-item {
   background: white;
   border: 1px solid #e9ecef;
   border-radius: 10px;
@@ -467,7 +467,7 @@
     border-color: #007bff;
   }
   
-  .sport-header {
+  .category-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -475,23 +475,23 @@
     flex-wrap: wrap;
     gap: 0.5rem;
     
-    .sport-name-wrapper {
+    .category-name-wrapper {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       
-      .sport-icon {
+      .category-icon {
         font-size: 1.2rem;
       }
       
-      .sport-name {
+      .category-name {
         font-size: 0.95rem;
         font-weight: 600;
         color: #343a40;
       }
     }
     
-    .sport-badge {
+    .category-badge {
       background: #f8f9fa;
       padding: 0.25rem 0.6rem;
       border-radius: 20px;
@@ -501,7 +501,7 @@
     }
   }
   
-  .sport-stats-grid {
+  .category-stats-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
@@ -536,7 +536,7 @@
     }
   }
   
-  .sport-progress-section {
+  .category-progress-section {
     .progress-labels {
       display: flex;
       justify-content: space-between;
@@ -661,6 +661,45 @@
   }
 }
 
+// ===== MONTHLY CHART CUSTOMIZATION =====
+.monthly-chart-container {
+  .chart-stats-summary {
+    .summary-card {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 0.75rem;
+      text-align: center;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+      }
+      
+      .summary-label {
+        font-size: 0.7rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.3rem;
+      }
+      
+      .summary-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        
+        &.positive {
+          color: #28a745;
+        }
+        
+        &.negative {
+          color: #dc3545;
+        }
+      }
+    }
+  }
+}
+
 // ===== RESPONSIVE =====
 @media (max-width: 768px) {
   .container-fluid {
@@ -697,10 +736,10 @@
     }
   }
   
-  .sport-stat-item {
+  .category-stat-item {
     padding: 0.6rem;
     
-    .sport-stats-grid {
+    .category-stats-grid {
       gap: 0.4rem;
       
       .stat-box {
@@ -717,6 +756,14 @@
     gap: 0.5rem;
     
     .stat-value {
+      font-size: 0.9rem;
+    }
+  }
+  
+  .monthly-chart-container .chart-stats-summary .summary-card {
+    padding: 0.5rem;
+    
+    .summary-value {
       font-size: 0.9rem;
     }
   }
@@ -741,7 +788,6 @@
     display: block !important;
   }
 }
-
 
 // ===== CAMPAIGN STATS SECTION =====
 .campaign-item {
@@ -869,5 +915,118 @@
         font-size: 0.7rem;
       }
     }
+  }
+}
+
+// ===== CHART TOOLTIP STYLES =====
+.chart-tooltip {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+// ===== FILTER SECTION IMPROVEMENTS =====
+.filter-section {
+  .filter-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.3rem;
+  }
+  
+  .filter-select {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    
+    &:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+  }
+}
+
+// ===== RESPONSIVE TABLE IMPROVEMENTS =====
+.table {
+  th {
+    font-weight: 600;
+    color: #495057;
+    border-top: none;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  
+  td {
+    vertical-align: middle;
+    font-size: 0.9rem;
+  }
+}
+
+// ===== BADGE IMPROVEMENTS =====
+.badge {
+  padding: 0.35rem 0.6rem;
+  font-weight: 500;
+  border-radius: 20px;
+}
+
+// ===== CARD IMPROVEMENTS =====
+.card {
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  
+  .card-header {
+    background: white;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 1rem 1.25rem;
+  }
+  
+  .card-body {
+    padding: 1.25rem;
+  }
+}
+
+// ===== PROGRESS BAR IMPROVEMENTS =====
+.progress {
+  background-color: #f1f3f5;
+  border-radius: 4px;
+  overflow: hidden;
+  
+  .progress-bar {
+    transition: width 0.6s ease;
+  }
+}
+
+// ===== ANIMATION FOR STATS EXPAND =====
+.campaign-stats-expanded {
+  animation: slideDown 0.3s ease-out;
+}
+
+// ===== RESPONSIVE ADDITIONS =====
+@media (max-width: 576px) {
+  .table-responsive {
+    font-size: 0.75rem;
+  }
+  
+  .badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+  
+  .btn-sm {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
   }
 }
