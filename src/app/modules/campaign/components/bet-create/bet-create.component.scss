@@ -1,0 +1,64 @@
+// src/app/components/bet-create/bet-create.component.scss
+
+// ===== ADD THIS: Category select button styles =====
+.category-select-wrapper {
+  .input-group {
+    .input-group-append {
+      .add-category-btn {
+        border-radius: 0 8px 8px 0;
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-left: none;
+        padding: 0.375rem 0.75rem;
+        color: #495057;
+        
+        &:hover:not(:disabled) {
+          background-color: #e9ecef;
+          color: #007bff;
+        }
+        
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}
+
+// ===== ADD THIS: New category input styles =====
+.new-category-input {
+  animation: slideDown 0.3s ease-out;
+  
+  .input-group {
+    .input-group-append {
+      .btn-success {
+        border-radius: 0;
+        
+        &:hover:not(:disabled) {
+          background-color: #218838;
+        }
+      }
+      
+      .btn-secondary {
+        border-radius: 0 8px 8px 0;
+        
+        &:hover {
+          background-color: #5a6268;
+        }
+      }
+    }
+  }
+}
+
+// ===== ADD THIS: Slide down animation =====
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

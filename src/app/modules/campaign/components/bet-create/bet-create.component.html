@@ -43,27 +43,29 @@
     <!-- Category Selection -->
     <div class="form-group">
       <label>Category</label>
-      <div class="input-group">
-        <select class="form-control" 
-                [(ngModel)]="category" 
-                [disabled]="currencyService.displayAmount(currentBalance) <= 0">
-          <option *ngFor="let cat of categoriesForSelect" [value]="cat.value">
-            {{ cat.label }}
-          </option>
-        </select>
-        <div class="input-group-append">
-          <button class="btn btn-outline-secondary" 
-                  type="button"
-                  (click)="toggleNewCategoryInput()"
-                  [disabled]="currencyService.displayAmount(currentBalance) <= 0"
-                  title="Add new category">
-            <i class="fas fa-plus"></i>
-          </button>
+      <div class="category-select-wrapper">
+        <div class="input-group">
+          <select class="form-control" 
+                  [(ngModel)]="category" 
+                  [disabled]="currencyService.displayAmount(currentBalance) <= 0">
+            <option *ngFor="let cat of categoriesForSelect" [value]="cat.value">
+              {{ cat.label }}
+            </option>
+          </select>
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary add-category-btn" 
+                    type="button"
+                    (click)="toggleNewCategoryInput()"
+                    [disabled]="currencyService.displayAmount(currentBalance) <= 0"
+                    title="Add new category">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
         </div>
       </div>
       
       <!-- New Category Input -->
-      <div *ngIf="showNewCategoryInput" class="mt-2">
+      <div *ngIf="showNewCategoryInput" class="new-category-input mt-2">
         <div class="input-group">
           <input type="text" 
                  class="form-control" 
@@ -91,7 +93,7 @@
       </div>
       
       <small class="form-text text-muted" *ngIf="!showNewCategoryInput">
-        Select an existing category or click the + button to add a new one
+        Select an existing category or click the <strong>+</strong> button to add a new one
       </small>
     </div>
 
