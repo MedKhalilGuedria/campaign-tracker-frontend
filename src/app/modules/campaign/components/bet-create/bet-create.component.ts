@@ -13,7 +13,7 @@ export class BetCreateComponent {
   @Input() currentBalance!: number;
   @Output() betPlaced = new EventEmitter<void>();
 
-  sport = '';
+  category = '';
   odds = 0;
   stake: number | null = null;
   useFullBalance = true;
@@ -47,7 +47,7 @@ export class BetCreateComponent {
       return;
     }
 
-    if (!this.sport.trim()) {
+    if (!this.category.trim()) {
       this.errorMessage = 'Sport is required';
       return;
     }
@@ -75,7 +75,7 @@ export class BetCreateComponent {
 
     this.betService.create({
       campaign_id: this.campaignId,
-      sport: this.sport,
+      category: this.category,
       odds: this.odds,
       stake: stakeToSend
     }).subscribe({
@@ -91,7 +91,7 @@ export class BetCreateComponent {
   }
 
   resetForm(): void {
-    this.sport = '';
+    this.category = '';
     this.odds = 0;
     this.stake = null;
     this.useFullBalance = true;

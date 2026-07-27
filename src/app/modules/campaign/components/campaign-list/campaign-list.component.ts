@@ -1,3 +1,4 @@
+// src/app/components/campaign-list/campaign-list.component.ts
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ChartConfiguration } from 'chart.js';
@@ -5,6 +6,30 @@ import { Router } from '@angular/router';
 import { CampaignService, Campaign, CampaignStats } from '../../services/campaign.service';
 import { BetService, Bet } from '../../services/bet.service';
 import { CurrencyService } from '../../services/currency.service';
+
+interface CategoryStats {
+  category: string;
+  totalBets: number;
+  totalStaked: number;
+  totalProfitLoss: number;
+  wins: number;
+  losses: number;
+  pending: number;
+  void: number;
+  winRate: number;
+}
+
+interface MonthlyStats {
+  month: string;
+  monthNumber: number;
+  year: number;
+  profitLoss: number;
+  totalBets: number;
+  totalStaked: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+}
 
 interface CampaignStatsData {
   totalProfitLoss: number;
@@ -17,18 +42,6 @@ interface CampaignStatsData {
   void: number;
 }
 
-interface SportStats {
-  sport: string;
-  totalBets: number;
-  totalStaked: number;
-  totalProfitLoss: number;
-  wins: number;
-  losses: number;
-  pending: number;
-  void: number;
-  winRate: number;
-}
-
 interface CasinoStats {
   totalPlays: number;
   totalStaked: number;
@@ -37,7 +50,7 @@ interface CasinoStats {
   losses: number;
 }
 
-const SPORT_ICONS: Record<string, string> = {
+const CATEGORY_ICONS: Record<string, string> = {
   football: '⚽',
   soccer: '⚽',
   'football (cl)': '⚽',
@@ -75,15 +88,15 @@ const SPORT_ICONS: Record<string, string> = {
   unknown: '🏅',
 };
 
-function getSportIcon(sport: string): string {
-  if (!sport) return '🏅';
-  const lower = sport.toLowerCase().trim();
+function getCategoryIcon(category: string): string {
+  if (!category) return '🏅';
+  const lower = category.toLowerCase().trim();
 
-  if (SPORT_ICONS[lower]) return SPORT_ICONS[lower];
+  if (CATEGORY_ICONS[lower]) return CATEGORY_ICONS[lower];
 
-  for (const key of Object.keys(SPORT_ICONS)) {
+  for (const key of Object.keys(CATEGORY_ICONS)) {
     if (lower.includes(key) || key.includes(lower)) {
-      return SPORT_ICONS[key];
+      return CATEGORY_ICONS[key];
     }
   }
 
@@ -104,8 +117,16 @@ export class CampaignListComponent implements OnInit, OnDestroy {
   chartView: 'cumulative' | 'daily' | 'both' = 'both';
   activeTab: string = 'sports';
   expandedCampaignId: number | null = null;
-comparisonMetric: string = 'profit_loss'; // profit_loss, total_bets, win_rate, roi, balance_usage
-campaignsWithStats: any[] = [];
+  comparisonMetric: string = 'profit_loss';
+  campaignsWithStats: any[] = [];
+  
+  categoryStats: CategoryStats[] = [];
+  selectedCategory: string = 'all';
+  availableCategories: string[] = [];
+  categoriesForSelect: { value: string; label: string }[] = [];
+  monthlyStats: MonthlyStats[] = [];
+  showMonthlyChart: boolean = true;
+
   stats: CampaignStatsData = {
     totalProfitLoss: 0,
     totalStaked: 0,
@@ -135,9 +156,6 @@ campaignsWithStats: any[] = [];
     wins: 0,
     losses: 0,
   };
-
-  sportStats: SportStats[] = [];
-  selectedSport: string = 'all';
 
   winLossStats = { wins: 0, losses: 0 };
 
@@ -179,60 +197,116 @@ campaignsWithStats: any[] = [];
   selectedEndDate: Date | null = null;
 
   public chartData!: ChartConfiguration<'line'>['data'];
-public campaignComparisonChartData: ChartConfiguration<'bar'>['data'] = {
-  labels: [],
-  datasets: []
-};
-
-public campaignComparisonChartOptions: ChartConfiguration<'bar'>['options'] = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      display: true,
-      position: 'top',
-    },
-    tooltip: {
-      callbacks: {
-        label: (context) => {
-          const value = context.parsed.y;
-          const metric = this.comparisonMetric;          if (metric === 'profit_loss') {
-            return `Profit/Loss: ${value && value >= 0 ? '+' : ''}${this.currencyService.formatCurrency(value || 0)}`;
-          } else if (metric === 'total_bets') {
-            return `Total Bets: ${value || 0}`;
-          } else if (metric === 'win_rate') {
-            return `Win Rate: ${value || 0}%`;
-          } else if (metric === 'roi') {
-            return `ROI: ${value || 0}%`;
-          } else if (metric === 'balance_usage') {
-            return `Balance Usage: ${value || 0}%`;
-          }
-          return `${value || 0}`;
-        }
-      }
-    }
-  },
-  scales: {
-    y: {
-      beginAtZero: true,
-      title: {
+  
+  public monthlyChartData!: ChartConfiguration<'bar'>['data'];
+  public monthlyChartOptions: ChartConfiguration<'bar'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
         display: true,
-        text: ''
+        position: 'top',
       },
-      ticks: {
-        callback: (value) => {
-          if (this.comparisonMetric === 'profit_loss') {
-            return this.currencyService.formatCurrency(value as number);
-          } else if (this.comparisonMetric === 'win_rate' || this.comparisonMetric === 'roi' || this.comparisonMetric === 'balance_usage') {
-            return `${value}%`;
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const value = context.parsed.y;
+            if (value == null) return 'Profit/Loss: 0';
+            return `Profit/Loss: ${value >= 0 ? '+' : ''}${this.currencyService.formatCurrency(value || 0)}`;
           }
-          return value;
+        }
+      }
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Month'
+        }
+      },
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Profit/Loss'
+        },
+        ticks: {
+          callback: (value) => {
+            return this.currencyService.formatCurrency(value as number);
+          }
+        }
+      },
+      y1: {
+        beginAtZero: true,
+        position: 'right',
+        title: {
+          display: true,
+          text: 'Number of Bets'
+        },
+        grid: {
+          drawOnChartArea: false
+        },
+        ticks: {
+          stepSize: 1
         }
       }
     }
-  }
-};
+  };
 
+  public campaignComparisonChartData: ChartConfiguration<'bar'>['data'] = {
+    labels: [],
+    datasets: []
+  };
+
+  public campaignComparisonChartOptions: ChartConfiguration<'bar'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const value = context.parsed.y;
+            const metric = this.comparisonMetric;
+            if (metric === 'profit_loss') {
+              return `Profit/Loss: ${value != null && value >= 0 ? '+' : ''}${this.currencyService.formatCurrency(value || 0)}`;
+            } else if (metric === 'total_bets') {
+              return `Total Bets: ${value || 0}`;
+            } else if (metric === 'win_rate') {
+              return `Win Rate: ${value || 0}%`;
+            } else if (metric === 'roi') {
+              return `ROI: ${value || 0}%`;
+            } else if (metric === 'balance_usage') {
+              return `Balance Usage: ${value || 0}%`;
+            }
+            return `${value || 0}`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: ''
+        },
+        ticks: {
+          callback: (value) => {
+            if (this.comparisonMetric === 'profit_loss') {
+              return this.currencyService.formatCurrency(value as number);
+            } else if (this.comparisonMetric === 'win_rate' || this.comparisonMetric === 'roi' || this.comparisonMetric === 'balance_usage') {
+              return `${value}%`;
+            }
+            return value;
+          }
+        }
+      }
+    }
+  };
 
   public profitLossChartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
@@ -313,14 +387,17 @@ public campaignComparisonChartOptions: ChartConfiguration<'bar'>['options'] = {
     this.filterForm = this.fb.group({
       timeFilter: ['all'],
       monthFilter: ['all'],
+      categoryFilter: ['all'],
     });
 
     this.chartData = { labels: [], datasets: [] };
+    this.monthlyChartData = { labels: [], datasets: [] };
   }
 
   ngOnInit(): void {
     this.loadCampaigns();
     this.loadAllBets();
+    this.loadCategories();
     this.initDateTime();
     this.startDateTimeUpdate();
 
@@ -335,6 +412,31 @@ public campaignComparisonChartOptions: ChartConfiguration<'bar'>['options'] = {
     }
   }
 
+  loadCategories(): void {
+    this.betService.getCategories().subscribe({
+      next: (categories) => {
+        this.availableCategories = categories;
+        this.categoriesForSelect = [
+          { value: 'all', label: 'All Categories' },
+          ...categories.map(cat => ({ value: cat, label: this.formatCategoryName(cat) }))
+        ];
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.availableCategories = ['Football', 'Basketball', 'Tennis', 'Casino', 'Esports'];
+        this.categoriesForSelect = [
+          { value: 'all', label: 'All Categories' },
+          ...this.availableCategories.map(cat => ({ value: cat, label: cat }))
+        ];
+      }
+    });
+  }
+
+  formatCategoryName(category: string): string {
+    return category.charAt(0).toUpperCase() + category.slice(1);
+  }
+
   initDateTime(): void {
     this.updateDateTime();
     this.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -345,310 +447,7 @@ public campaignComparisonChartOptions: ChartConfiguration<'bar'>['options'] = {
       this.updateDateTimeOnly();
     }, 1000);
   }
-updateCampaignsWithStats(): void {
-  this.campaignsWithStats = this.campaigns.map(campaign => ({
-    ...campaign,
-    stats: this.campaignsStats.get(campaign.id)
-  })).filter(c => c.stats); // Only show campaigns with stats
-  if (this.campaignsWithStats.length > 0) {
-    this.updateComparisonChart();
-  }
-}
 
-// Fix the updateComparisonChart method - replace the entire method with this:
-
-updateComparisonChart(): void {
-  const labels = this.campaignsWithStats.map(c => c.name);
-  let data: number[] = [];
-  let label = '';
-  let backgroundColor = '';
-
-  switch(this.comparisonMetric) {
-    case 'profit_loss':
-      data = this.campaignsWithStats.map(c => c.stats?.total_profit_loss || 0);
-      label = 'Profit / Loss';
-      backgroundColor = 'rgba(40, 167, 69, 0.7)';
-      break;
-    case 'total_bets':
-      data = this.campaignsWithStats.map(c => c.stats?.total_bets || 0);
-      label = 'Total Bets';
-      backgroundColor = 'rgba(52, 152, 219, 0.7)';
-      break;
-    case 'win_rate':
-      data = this.campaignsWithStats.map(c => c.stats?.win_rate || 0);
-      label = 'Win Rate (%)';
-      backgroundColor = 'rgba(255, 193, 7, 0.7)';
-      break;
-    case 'roi':
-      data = this.campaignsWithStats.map(c => c.stats?.roi || 0);
-      label = 'ROI (%)';
-      backgroundColor = 'rgba(23, 162, 184, 0.7)';
-      break;
-    case 'balance_usage':
-      data = this.campaignsWithStats.map(c => c.stats?.balance_utilization || 0);
-      label = 'Balance Usage (%)';
-      backgroundColor = 'rgba(111, 66, 193, 0.7)';
-      break;
-  }
-
-  this.campaignComparisonChartData = {
-    labels: labels,
-    datasets: [{
-      label: label,
-      data: data,
-      backgroundColor: backgroundColor,
-      borderColor: backgroundColor.replace('0.7', '1'),
-      borderWidth: 1,
-      borderRadius: 4,
-      barPercentage: 0.7,
-      categoryPercentage: 0.8
-    }]
-  };
-
-  // Safely update the y-axis title
-  if (this.campaignComparisonChartOptions && 
-      this.campaignComparisonChartOptions.scales && 
-      this.campaignComparisonChartOptions.scales['y']) {
-    const yScale = this.campaignComparisonChartOptions.scales['y'];
-    if (yScale && yScale.title) {
-      yScale.title.text = this.getMetricLabel();
-    }
-  }
-}
-
-setComparisonMetric(metric: string): void {
-  this.comparisonMetric = metric;
-  this.updateComparisonChart();
-}
-
-getMetricLabel(): string {
-  switch(this.comparisonMetric) {
-    case 'profit_loss': return 'Profit / Loss';
-    case 'total_bets': return 'Number of Bets';
-    case 'win_rate': return 'Win Rate (%)';
-    case 'roi': return 'ROI (%)';
-    case 'balance_usage': return 'Balance Usage (%)';
-    default: return '';
-  }
-}
-
-getMetricUnit(): string {
-  switch(this.comparisonMetric) {
-    case 'profit_loss': return '';
-    case 'total_bets': return 'bets';
-    case 'win_rate': return '%';
-    case 'roi': return '%';
-    case 'balance_usage': return '%';
-    default: return '';
-  }
-}
-
-getBestCampaignMetric(): string {
-  return this.getMetricLabel();
-}
-
-getBestCampaignName(): string {
-  if (this.campaignsWithStats.length === 0) return '-';
-  
-  let bestCampaign = this.campaignsWithStats[0];
-  let bestValue = -Infinity;
-  
-  for (const campaign of this.campaignsWithStats) {
-    let currentValue = 0;
-    
-    switch(this.comparisonMetric) {
-      case 'profit_loss':
-        currentValue = campaign.stats?.total_profit_loss || 0;
-        break;
-      case 'total_bets':
-        currentValue = campaign.stats?.total_bets || 0;
-        break;
-      case 'win_rate':
-        currentValue = campaign.stats?.win_rate || 0;
-        break;
-      case 'roi':
-        currentValue = campaign.stats?.roi || 0;
-        break;
-      case 'balance_usage':
-        currentValue = campaign.stats?.balance_utilization || 0;
-        break;
-    }
-    
-    if (currentValue > bestValue) {
-      bestValue = currentValue;
-      bestCampaign = campaign;
-    }
-  }
-  
-  return bestCampaign.name;
-}
-
-getBestCampaignValue(): number {
-  if (this.campaignsWithStats.length === 0) return 0;
-  
-  let bestValue = -Infinity;
-  for (const campaign of this.campaignsWithStats) {
-    let value = 0;
-    switch(this.comparisonMetric) {
-      case 'profit_loss':
-        value = campaign.stats?.total_profit_loss || 0;
-        break;
-      case 'total_bets':
-        value = campaign.stats?.total_bets || 0;
-        break;
-      case 'win_rate':
-        value = campaign.stats?.win_rate || 0;
-        break;
-      case 'roi':
-        value = campaign.stats?.roi || 0;
-        break;
-      case 'balance_usage':
-        value = campaign.stats?.balance_utilization || 0;
-        break;
-    }
-    if (value > bestValue) bestValue = value;
-  }
-  
-  return bestValue === -Infinity ? 0 : bestValue;
-}
-
-getAverageMetricValue(): number {
-  if (this.campaignsWithStats.length === 0) return 0;
-  
-  let sum = 0;
-  let count = 0;
-  for (const campaign of this.campaignsWithStats) {
-    switch(this.comparisonMetric) {
-      case 'profit_loss':
-        if (campaign.stats?.total_profit_loss !== undefined) {
-          sum += campaign.stats.total_profit_loss;
-          count++;
-        }
-        break;
-      case 'total_bets':
-        sum += campaign.stats?.total_bets || 0;
-        count++;
-        break;
-      case 'win_rate':
-        sum += campaign.stats?.win_rate || 0;
-        count++;
-        break;
-      case 'roi':
-        if (campaign.stats?.roi !== undefined) {
-          sum += campaign.stats.roi;
-          count++;
-        }
-        break;
-      case 'balance_usage':
-        sum += campaign.stats?.balance_utilization || 0;
-        count++;
-        break;
-    }
-  }
-  
-  return count > 0 ? sum / count : 0;
-}
-
-getActiveCampaignsCount(): number {
-  return this.campaignsWithStats.filter(c => (c.stats?.total_bets || 0) > 0).length;
-}
-
-getPerformanceBarWidth(campaign: any): number {
-  if (!campaign.stats) return 0;
-  
-  // Find max value for normalization
-  let maxValue = 0;
-  for (const c of this.campaignsWithStats) {
-    if (!c.stats) continue;
-    let value = 0;
-    switch(this.comparisonMetric) {
-      case 'profit_loss':
-        value = Math.abs(c.stats.total_profit_loss || 0);
-        break;
-      case 'total_bets':
-        value = c.stats.total_bets || 0;
-        break;
-      case 'win_rate':
-        value = c.stats.win_rate || 0;
-        break;
-      case 'roi':
-        value = Math.abs(c.stats.roi || 0);
-        break;
-      case 'balance_usage':
-        value = c.stats.balance_utilization || 0;
-        break;
-    }
-    if (value > maxValue) maxValue = value;
-  }
-  
-  if (maxValue === 0) return 0;
-  
-  let currentValue = 0;
-  switch(this.comparisonMetric) {
-    case 'profit_loss':
-      currentValue = Math.abs(campaign.stats.total_profit_loss || 0);
-      break;
-    case 'total_bets':
-      currentValue = campaign.stats.total_bets || 0;
-      break;
-    case 'win_rate':
-      currentValue = campaign.stats.win_rate || 0;
-      break;
-    case 'roi':
-      currentValue = Math.abs(campaign.stats.roi || 0);
-      break;
-    case 'balance_usage':
-      currentValue = campaign.stats.balance_utilization || 0;
-      break;
-  }
-  
-  return (currentValue / maxValue) * 100;
-}
-
-getTotalProfitLossAllCampaigns(): number {
-  return this.campaignsWithStats.reduce((sum, c) => {
-    return sum + (c.stats?.total_profit_loss || 0);
-  }, 0);
-}
-
-getTotalBetsAllCampaigns(): number {
-  return this.campaignsWithStats.reduce((sum, c) => {
-    return sum + (c.stats?.total_bets || 0);
-  }, 0);
-}
-
-getAverageWinRateAllCampaigns(): number {
-  const totalBets = this.getTotalBetsAllCampaigns();
-  if (totalBets === 0) return 0;
-  
-  let weightedWins = 0;
-  for (const campaign of this.campaignsWithStats) {
-    weightedWins += (campaign.stats?.wins || 0);
-  }
-  
-  return (weightedWins / totalBets) * 100;
-}
-
-getTotalBalanceAllCampaigns(): number {
-  return this.campaigns.reduce((sum, c) => sum + (c.current_balance || 0), 0);
-}
-
-
-// Update the loadAllCampaignsStats method to also update campaignsWithStats
-loadAllCampaignsStats(): void {
-  this.campaignService.getAllCampaignsStats().subscribe({
-    next: (stats) => {
-      stats.forEach(stat => {
-        this.campaignsStats.set(stat.campaign_id, stat);
-      });
-      this.updateCampaignsWithStats();
-      this.cdr.detectChanges();
-    },
-    error: (error) => {
-      console.error('Error loading campaign stats:', error);
-    }
-  });
-}
   updateDateTime(): void {
     this.updateDateTimeOnly();
   }
@@ -687,7 +486,30 @@ loadAllCampaignsStats(): void {
     });
   }
 
-  
+  loadAllCampaignsStats(): void {
+    this.campaignService.getAllCampaignsStats().subscribe({
+      next: (stats) => {
+        stats.forEach(stat => {
+          this.campaignsStats.set(stat.campaign_id, stat);
+        });
+        this.updateCampaignsWithStats();
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error loading campaign stats:', error);
+      }
+    });
+  }
+
+  updateCampaignsWithStats(): void {
+    this.campaignsWithStats = this.campaigns.map(campaign => ({
+      ...campaign,
+      stats: this.campaignsStats.get(campaign.id)
+    })).filter(c => c.stats);
+    if (this.campaignsWithStats.length > 0) {
+      this.updateComparisonChart();
+    }
+  }
 
   getCampaignStats(campaignId: number): CampaignStats | undefined {
     return this.campaignsStats.get(campaignId);
@@ -718,6 +540,7 @@ loadAllCampaignsStats(): void {
     let filtered = [...this.allBets];
     const timeFilter = this.filterForm.get('timeFilter')?.value || 'all';
     const monthFilter = this.filterForm.get('monthFilter')?.value;
+    const categoryFilter = this.filterForm.get('categoryFilter')?.value || 'all';
 
     if (timeFilter !== 'all') {
       if (timeFilter === 'custom') {
@@ -752,11 +575,20 @@ loadAllCampaignsStats(): void {
       );
     }
 
+    if (categoryFilter && categoryFilter !== 'all') {
+      filtered = filtered.filter(
+        (bet) => bet.category.toLowerCase() === categoryFilter.toLowerCase()
+      );
+    }
+
     this.filteredBets = filtered;
+    
     this.calculateStats();
+    this.calculateMonthlyStats();
     this.updateWinLossChart();
     this.prepareChartData();
     this.rebuildChartData();
+    this.updateMonthlyChart();
 
     this.mobileResultFilter = 'all';
     this.mobileSortBy = 'date';
@@ -764,13 +596,88 @@ loadAllCampaignsStats(): void {
     this.applyMobileFilters();
   }
 
+  calculateMonthlyStats(): void {
+    const monthlyMap = new Map<string, MonthlyStats>();
+    
+    this.filteredBets.forEach(bet => {
+      const date = new Date(bet.created_at);
+      const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+      const monthName = date.toLocaleString('default', { month: 'long' });
+      
+      if (!monthlyMap.has(monthKey)) {
+        monthlyMap.set(monthKey, {
+          month: `${monthName} ${date.getFullYear()}`,
+          monthNumber: date.getMonth(),
+          year: date.getFullYear(),
+          profitLoss: 0,
+          totalBets: 0,
+          totalStaked: 0,
+          wins: 0,
+          losses: 0,
+          winRate: 0
+        });
+      }
+      
+      const stats = monthlyMap.get(monthKey)!;
+      stats.profitLoss += bet.profit_loss || 0;
+      stats.totalBets++;
+      stats.totalStaked += bet.stake || 0;
+      if (bet.result === 'win') stats.wins++;
+      if (bet.result === 'loss') stats.losses++;
+    });
+    
+    monthlyMap.forEach(stats => {
+      stats.winRate = stats.totalBets > 0 ? (stats.wins / stats.totalBets) * 100 : 0;
+    });
+    
+    this.monthlyStats = Array.from(monthlyMap.values())
+      .sort((a, b) => a.year - b.year || a.monthNumber - b.monthNumber);
+    
+    this.updateMonthlyChart();
+  }
+
+  updateMonthlyChart(): void {
+    const labels = this.monthlyStats.map(m => m.month);
+    const profitLossData = this.monthlyStats.map(m => m.profitLoss);
+    const betCounts = this.monthlyStats.map(m => m.totalBets);
+    
+    this.monthlyChartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Monthly Profit/Loss',
+          data: profitLossData,
+          backgroundColor: profitLossData.map(value => 
+            value >= 0 ? 'rgba(40, 167, 69, 0.7)' : 'rgba(220, 53, 69, 0.7)'
+          ),
+          borderColor: profitLossData.map(value => 
+            value >= 0 ? 'rgb(40, 167, 69)' : 'rgb(220, 53, 69)'
+          ),
+          borderWidth: 2,
+          borderRadius: 4,
+          barPercentage: 0.7,
+          categoryPercentage: 0.8,
+        } as any,
+        {
+          label: 'Number of Bets',
+          data: betCounts,
+          backgroundColor: 'rgba(52, 152, 219, 0.3)',
+          borderColor: 'rgb(52, 152, 219)',
+          borderWidth: 2,
+          fill: false,
+          tension: 0.4,
+        } as any
+      ]
+    };
+  }
+
   calculateStats(): void {
     const allBets = this.filteredBets;
     const casinoBets = allBets.filter(
-      (bet) => bet.sport?.toLowerCase() === 'casino'
+      (bet) => bet.category?.toLowerCase() === 'casino'
     );
     const regularBets = allBets.filter(
-      (bet) => bet.sport?.toLowerCase() !== 'casino'
+      (bet) => bet.category?.toLowerCase() !== 'casino'
     );
 
     const wins = allBets.filter((b) => b.result === 'win').length;
@@ -824,17 +731,17 @@ loadAllCampaignsStats(): void {
     };
 
     this.winLossStats = { wins, losses };
-    this.calculateSportStats(regularBets);
+    this.calculateCategoryStats(regularBets);
   }
 
-  calculateSportStats(regularBets: Bet[]): void {
-    const sportMap = new Map<string, SportStats>();
+  calculateCategoryStats(regularBets: Bet[]): void {
+    const categoryMap = new Map<string, CategoryStats>();
 
     regularBets.forEach((bet) => {
-      const sport = bet.sport || 'Unknown';
-      if (!sportMap.has(sport)) {
-        sportMap.set(sport, {
-          sport,
+      const category = bet.category || 'Unknown';
+      if (!categoryMap.has(category)) {
+        categoryMap.set(category, {
+          category,
           totalBets: 0,
           totalStaked: 0,
           totalProfitLoss: 0,
@@ -846,24 +753,24 @@ loadAllCampaignsStats(): void {
         });
       }
 
-      const s = sportMap.get(sport)!;
-      s.totalBets++;
-      s.totalStaked += bet.stake || 0;
-      s.totalProfitLoss += bet.profit_loss || 0;
+      const c = categoryMap.get(category)!;
+      c.totalBets++;
+      c.totalStaked += bet.stake || 0;
+      c.totalProfitLoss += bet.profit_loss || 0;
 
       switch (bet.result) {
-        case 'win':     s.wins++;    break;
-        case 'loss':    s.losses++;  break;
-        case 'pending': s.pending++; break;
-        case 'void':    s.void++;    break;
+        case 'win':     c.wins++;    break;
+        case 'loss':    c.losses++;  break;
+        case 'pending': c.pending++; break;
+        case 'void':    c.void++;    break;
       }
     });
 
-    sportMap.forEach((s) => {
-      s.winRate = s.totalBets > 0 ? (s.wins / s.totalBets) * 100 : 0;
+    categoryMap.forEach((c) => {
+      c.winRate = c.totalBets > 0 ? (c.wins / c.totalBets) * 100 : 0;
     });
 
-    this.sportStats = Array.from(sportMap.values()).sort(
+    this.categoryStats = Array.from(categoryMap.values()).sort(
       (a, b) => b.totalBets - a.totalBets
     );
   }
@@ -945,13 +852,307 @@ loadAllCampaignsStats(): void {
     };
   }
 
+  updateComparisonChart(): void {
+    const labels = this.campaignsWithStats.map(c => c.name);
+    let data: number[] = [];
+    let label = '';
+    let backgroundColor = '';
+
+    switch(this.comparisonMetric) {
+      case 'profit_loss':
+        data = this.campaignsWithStats.map(c => c.stats?.total_profit_loss || 0);
+        label = 'Profit / Loss';
+        backgroundColor = 'rgba(40, 167, 69, 0.7)';
+        break;
+      case 'total_bets':
+        data = this.campaignsWithStats.map(c => c.stats?.total_bets || 0);
+        label = 'Total Bets';
+        backgroundColor = 'rgba(52, 152, 219, 0.7)';
+        break;
+      case 'win_rate':
+        data = this.campaignsWithStats.map(c => c.stats?.win_rate || 0);
+        label = 'Win Rate (%)';
+        backgroundColor = 'rgba(255, 193, 7, 0.7)';
+        break;
+      case 'roi':
+        data = this.campaignsWithStats.map(c => c.stats?.roi || 0);
+        label = 'ROI (%)';
+        backgroundColor = 'rgba(23, 162, 184, 0.7)';
+        break;
+      case 'balance_usage':
+        data = this.campaignsWithStats.map(c => c.stats?.balance_utilization || 0);
+        label = 'Balance Usage (%)';
+        backgroundColor = 'rgba(111, 66, 193, 0.7)';
+        break;
+    }
+
+    this.campaignComparisonChartData = {
+      labels: labels,
+      datasets: [{
+        label: label,
+        data: data,
+        backgroundColor: backgroundColor,
+        borderColor: backgroundColor.replace('0.7', '1'),
+        borderWidth: 1,
+        borderRadius: 4,
+        barPercentage: 0.7,
+        categoryPercentage: 0.8
+      }]
+    };
+
+    if (this.campaignComparisonChartOptions && 
+        this.campaignComparisonChartOptions.scales && 
+        this.campaignComparisonChartOptions.scales['y']) {
+      const yScale = this.campaignComparisonChartOptions.scales['y'];
+      if (yScale && yScale.title) {
+        yScale.title.text = this.getMetricLabel();
+      }
+    }
+  }
+
   setChartView(view: 'cumulative' | 'daily' | 'both'): void {
     this.chartView = view;
     this.rebuildChartData();
   }
 
-  getSportIcon(sport: string): string {
-    return getSportIcon(sport);
+  setComparisonMetric(metric: string): void {
+    this.comparisonMetric = metric;
+    this.updateComparisonChart();
+  }
+
+  getMetricLabel(): string {
+    switch(this.comparisonMetric) {
+      case 'profit_loss': return 'Profit / Loss';
+      case 'total_bets': return 'Number of Bets';
+      case 'win_rate': return 'Win Rate (%)';
+      case 'roi': return 'ROI (%)';
+      case 'balance_usage': return 'Balance Usage (%)';
+      default: return '';
+    }
+  }
+
+  getMetricUnit(): string {
+    switch(this.comparisonMetric) {
+      case 'profit_loss': return '';
+      case 'total_bets': return 'bets';
+      case 'win_rate': return '%';
+      case 'roi': return '%';
+      case 'balance_usage': return '%';
+      default: return '';
+    }
+  }
+
+  getBestCampaignName(): string {
+    if (this.campaignsWithStats.length === 0) return '-';
+    
+    let bestCampaign = this.campaignsWithStats[0];
+    let bestValue = -Infinity;
+    
+    for (const campaign of this.campaignsWithStats) {
+      let currentValue = 0;
+      
+      switch(this.comparisonMetric) {
+        case 'profit_loss':
+          currentValue = campaign.stats?.total_profit_loss || 0;
+          break;
+        case 'total_bets':
+          currentValue = campaign.stats?.total_bets || 0;
+          break;
+        case 'win_rate':
+          currentValue = campaign.stats?.win_rate || 0;
+          break;
+        case 'roi':
+          currentValue = campaign.stats?.roi || 0;
+          break;
+        case 'balance_usage':
+          currentValue = campaign.stats?.balance_utilization || 0;
+          break;
+      }
+      
+      if (currentValue > bestValue) {
+        bestValue = currentValue;
+        bestCampaign = campaign;
+      }
+    }
+    
+    return bestCampaign.name;
+  }
+
+  getBestCampaignValue(): number {
+    if (this.campaignsWithStats.length === 0) return 0;
+    
+    let bestValue = -Infinity;
+    for (const campaign of this.campaignsWithStats) {
+      let value = 0;
+      switch(this.comparisonMetric) {
+        case 'profit_loss':
+          value = campaign.stats?.total_profit_loss || 0;
+          break;
+        case 'total_bets':
+          value = campaign.stats?.total_bets || 0;
+          break;
+        case 'win_rate':
+          value = campaign.stats?.win_rate || 0;
+          break;
+        case 'roi':
+          value = campaign.stats?.roi || 0;
+          break;
+        case 'balance_usage':
+          value = campaign.stats?.balance_utilization || 0;
+          break;
+      }
+      if (value > bestValue) bestValue = value;
+    }
+    
+    return bestValue === -Infinity ? 0 : bestValue;
+  }
+
+  getAverageMetricValue(): number {
+    if (this.campaignsWithStats.length === 0) return 0;
+    
+    let sum = 0;
+    let count = 0;
+    for (const campaign of this.campaignsWithStats) {
+      switch(this.comparisonMetric) {
+        case 'profit_loss':
+          if (campaign.stats?.total_profit_loss !== undefined) {
+            sum += campaign.stats.total_profit_loss;
+            count++;
+          }
+          break;
+        case 'total_bets':
+          sum += campaign.stats?.total_bets || 0;
+          count++;
+          break;
+        case 'win_rate':
+          sum += campaign.stats?.win_rate || 0;
+          count++;
+          break;
+        case 'roi':
+          if (campaign.stats?.roi !== undefined) {
+            sum += campaign.stats.roi;
+            count++;
+          }
+          break;
+        case 'balance_usage':
+          sum += campaign.stats?.balance_utilization || 0;
+          count++;
+          break;
+      }
+    }
+    
+    return count > 0 ? sum / count : 0;
+  }
+
+  getActiveCampaignsCount(): number {
+    return this.campaignsWithStats.filter(c => (c.stats?.total_bets || 0) > 0).length;
+  }
+
+  getPerformanceBarWidth(campaign: any): number {
+    if (!campaign.stats) return 0;
+    
+    let maxValue = 0;
+    for (const c of this.campaignsWithStats) {
+      if (!c.stats) continue;
+      let value = 0;
+      switch(this.comparisonMetric) {
+        case 'profit_loss':
+          value = Math.abs(c.stats.total_profit_loss || 0);
+          break;
+        case 'total_bets':
+          value = c.stats.total_bets || 0;
+          break;
+        case 'win_rate':
+          value = c.stats.win_rate || 0;
+          break;
+        case 'roi':
+          value = Math.abs(c.stats.roi || 0);
+          break;
+        case 'balance_usage':
+          value = c.stats.balance_utilization || 0;
+          break;
+      }
+      if (value > maxValue) maxValue = value;
+    }
+    
+    if (maxValue === 0) return 0;
+    
+    let currentValue = 0;
+    switch(this.comparisonMetric) {
+      case 'profit_loss':
+        currentValue = Math.abs(campaign.stats.total_profit_loss || 0);
+        break;
+      case 'total_bets':
+        currentValue = campaign.stats.total_bets || 0;
+        break;
+      case 'win_rate':
+        currentValue = campaign.stats.win_rate || 0;
+        break;
+      case 'roi':
+        currentValue = Math.abs(campaign.stats.roi || 0);
+        break;
+      case 'balance_usage':
+        currentValue = campaign.stats.balance_utilization || 0;
+        break;
+    }
+    
+    return (currentValue / maxValue) * 100;
+  }
+
+  getTotalProfitLossAllCampaigns(): number {
+    return this.campaignsWithStats.reduce((sum, c) => {
+      return sum + (c.stats?.total_profit_loss || 0);
+    }, 0);
+  }
+
+  getTotalBetsAllCampaigns(): number {
+    return this.campaignsWithStats.reduce((sum, c) => {
+      return sum + (c.stats?.total_bets || 0);
+    }, 0);
+  }
+
+  getAverageWinRateAllCampaigns(): number {
+    const totalBets = this.getTotalBetsAllCampaigns();
+    if (totalBets === 0) return 0;
+    
+    let weightedWins = 0;
+    for (const campaign of this.campaignsWithStats) {
+      weightedWins += (campaign.stats?.wins || 0);
+    }
+    
+    return (weightedWins / totalBets) * 100;
+  }
+
+  getTotalBalanceAllCampaigns(): number {
+    return this.campaigns.reduce((sum, c) => sum + (c.current_balance || 0), 0);
+  }
+
+  getBestMonth(): MonthlyStats | null {
+    if (this.monthlyStats.length === 0) return null;
+    return this.monthlyStats.reduce((best, current) => 
+      current.profitLoss > best.profitLoss ? current : best
+    );
+  }
+
+  getWorstMonth(): MonthlyStats | null {
+    if (this.monthlyStats.length === 0) return null;
+    return this.monthlyStats.reduce((worst, current) => 
+      current.profitLoss < worst.profitLoss ? current : worst
+    );
+  }
+
+  getAverageMonthlyProfitLoss(): number {
+    if (this.monthlyStats.length === 0) return 0;
+    const total = this.monthlyStats.reduce((sum, m) => sum + m.profitLoss, 0);
+    return total / this.monthlyStats.length;
+  }
+
+  getProfitableMonthsCount(): number {
+    return this.monthlyStats.filter(m => m.profitLoss > 0).length;
+  }
+
+  getCategoryIcon(category: string): string {
+    return getCategoryIcon(category);
   }
 
   onDateChange(): void {
@@ -962,7 +1163,11 @@ loadAllCampaignsStats(): void {
   }
 
   resetFilters(): void {
-    this.filterForm.patchValue({ timeFilter: 'all', monthFilter: 'all' });
+    this.filterForm.patchValue({ 
+      timeFilter: 'all', 
+      monthFilter: 'all',
+      categoryFilter: 'all'
+    });
     this.selectedStartDate = null;
     this.selectedEndDate = null;
     this.applyFilters();

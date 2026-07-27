@@ -1,3 +1,4 @@
+// src/app/services/bet.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -6,7 +7,7 @@ import { environment } from 'src/environments/environment';
 export interface Bet {
   id: number;
   campaign_id: number;
-  sport: string;
+  category: string;  // Changed from sport to category
   stake: number;
   odds: number;
   result: string;
@@ -16,7 +17,7 @@ export interface Bet {
 
 export interface CreateBetData {
   campaign_id: number;
-  sport: string;
+  category: string;  // Changed from sport to category
   odds: number;
   stake?: number | null;
 }
@@ -58,12 +59,15 @@ export class BetService {
     return this.http.patch<Bet>(`${this.apiUrl}/${betId}`, data);
   }
 
-   getAllBets(): Observable<Bet[]> {
+  getAllBets(): Observable<Bet[]> {
     return this.http.get<Bet[]>(`${this.apiUrl}/all`);
   }
 
   getCampaignBets(campaignId: number): Observable<Bet[]> {
     return this.http.get<Bet[]>(`${this.apiUrl}/campaign/${campaignId}`);
   }
-  
+
+  getCategories(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/categories`);
+  }
 }

@@ -559,8 +559,8 @@
                 <tbody>
                   <tr *ngFor="let bet of pagedBets" class="bet-row" [class.bet-row-pending]="bet.result === 'pending'">
                     <td>
-                      <span class="sport-icon me-1">{{ getSportIcon(bet.sport) }}</span>
-                      <span class="sport-name">{{ bet.sport | titlecase }}</span>
+                      <span class="sport-icon me-1">{{ getSportIcon(bet.category) }}</span>
+                      <span class="sport-name">{{ bet.category | titlecase }}</span>
                     </td>
                     <td class="odds-cell">{{ bet.odds | number:'1.2-2' }}</td>
                     <td class="text-end">{{ bet.stake | currencyFormat }}</td>
@@ -621,8 +621,8 @@
                 <!-- Card top row: sport + result pill -->
                 <div class="mbc-top">
                   <div class="mbc-sport">
-                    <span class="mbc-sport-icon">{{ getSportIcon(bet.sport) }}</span>
-                    <span class="mbc-sport-name">{{ bet.sport | titlecase }}</span>
+                    <span class="mbc-sport-icon">{{ getSportIcon(bet.category) }}</span>
+                    <span class="mbc-sport-name">{{ bet.category | titlecase }}</span>
                   </div>
                   <span class="result-pill" [ngClass]="'result-' + bet.result">
                     {{ bet.result | titlecase }}

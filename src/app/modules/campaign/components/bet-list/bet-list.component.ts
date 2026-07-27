@@ -137,11 +137,11 @@ markAsLoss(bet: Bet): void {
 
   getPerformanceBySport(): any[] {
     const betsBySport = this.filteredBets.reduce((acc, bet) => {
-      if (!acc[bet.sport]) {
-        acc[bet.sport] = { sport: bet.sport, wins: 0, losses: 0, pending: 0, profit: 0 };
+      if (!acc[bet.category]) {
+        acc[bet.category] = { sport: bet.category, wins: 0, losses: 0, pending: 0, profit: 0 };
       }
-      acc[bet.sport][bet.result === 'pending' ? 'pending' : bet.result === 'win' ? 'wins' : 'losses']++;
-      acc[bet.sport].profit += bet.profit_loss;
+      acc[bet.category][bet.result === 'pending' ? 'pending' : bet.result === 'win' ? 'wins' : 'losses']++;
+      acc[bet.category].profit += bet.profit_loss;
       return acc;
     }, {} as any);
     

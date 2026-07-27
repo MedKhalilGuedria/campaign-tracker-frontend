@@ -405,9 +405,9 @@ export class CampaignDetailComponent implements OnInit, OnDestroy {
 
   getSportPerformance(): any[] {
     const map = this.filteredBets.reduce((acc, bet) => {
-      if (!acc[bet.sport]) acc[bet.sport] = { sport: bet.sport, profit: 0, bets: 0 };
-      acc[bet.sport].profit += bet.profit_loss;
-      acc[bet.sport].bets += 1;
+      if (!acc[bet.category]) acc[bet.category] = { sport: bet.category, profit: 0, bets: 0 };
+      acc[bet.category].profit += bet.profit_loss;
+      acc[bet.category].bets += 1;
       return acc;
     }, {} as any);
     return Object.values(map);
