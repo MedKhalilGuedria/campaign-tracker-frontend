@@ -1,4 +1,5 @@
-import { Component, Input, EventEmitter, Output } from '@angular/core';
+// src/app/components/bet-create/bet-create.component.ts
+import { Component, Input, EventEmitter, Output, OnInit } from '@angular/core';
 import { BetService } from '../../services/bet.service';
 import { CampaignService } from '../../services/campaign.service';
 import { CurrencyService } from '../../services/currency.service';
@@ -8,7 +9,7 @@ import { CurrencyService } from '../../services/currency.service';
   templateUrl: './bet-create.component.html',
   styleUrls: ['./bet-create.component.scss']
 })
-export class BetCreateComponent {
+export class BetCreateComponent implements OnInit {
   @Input() campaignId!: number;
   @Input() currentBalance!: number;
   @Output() betPlaced = new EventEmitter<void>();
@@ -18,12 +19,56 @@ export class BetCreateComponent {
   stake: number | null = null;
   useFullBalance = true;
   errorMessage = '';
+  
+  // Category management
+  availableCategories: string[] = [];
+  categoriesForSelect: { value: string; label: string }[] = [];
+  showNewCategoryInput: boolean = false;
+  newCategory: string = '';
+  isAddingCategory: boolean = false;
 
   constructor(
     private betService: BetService,
     private campaignService: CampaignService,
     public currencyService: CurrencyService
   ) { }
+
+  ngOnInit(): void {
+    this.loadCategories();
+  }
+
+  loadCategories(): void {
+    this.betService.getCategories().subscribe({
+      next: (categories) => {
+        this.availableCategories = categories;
+        this.updateCategoriesForSelect();
+        // If there are categories, select the first one by default
+        if (this.availableCategories.length > 0) {
+          this.category = this.availableCategories[0];
+        }
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        // Fallback categories
+        this.availableCategories = ['Football', 'Basketball', 'Tennis', 'Casino', 'Esports'];
+        this.updateCategoriesForSelect();
+        if (this.availableCategories.length > 0) {
+          this.category = this.availableCategories[0];
+        }
+      }
+    });
+  }
+
+  updateCategoriesForSelect(): void {
+    this.categoriesForSelect = this.availableCategories.map(cat => ({
+      value: cat,
+      label: this.formatCategoryName(cat)
+    }));
+  }
+
+  formatCategoryName(category: string): string {
+    return category.charAt(0).toUpperCase() + category.slice(1);
+  }
 
   // Handle checkbox change immediately
   onUseFullBalanceChange(checked: boolean): void {
@@ -38,6 +83,40 @@ export class BetCreateComponent {
     }
   }
 
+  // Toggle new category input
+  toggleNewCategoryInput(): void {
+    this.showNewCategoryInput = !this.showNewCategoryInput;
+    if (!this.showNewCategoryInput) {
+      this.newCategory = '';
+    }
+  }
+
+  // Add new category
+  addNewCategory(): void {
+    const trimmedCategory = this.newCategory.trim();
+    if (!trimmedCategory) {
+      this.errorMessage = 'Please enter a category name';
+      return;
+    }
+
+    // Check if category already exists
+    if (this.availableCategories.some(cat => cat.toLowerCase() === trimmedCategory.toLowerCase())) {
+      this.errorMessage = 'Category already exists';
+      return;
+    }
+
+    this.isAddingCategory = true;
+    this.errorMessage = '';
+
+    // Add the category locally (it will be saved when a bet is placed)
+    this.availableCategories.push(trimmedCategory);
+    this.updateCategoriesForSelect();
+    this.category = trimmedCategory;
+    this.showNewCategoryInput = false;
+    this.newCategory = '';
+    this.isAddingCategory = false;
+  }
+
   submit(): void {
     const availableBalance = this.currencyService.displayAmount(this.currentBalance);
     
@@ -48,7 +127,7 @@ export class BetCreateComponent {
     }
 
     if (!this.category.trim()) {
-      this.errorMessage = 'Sport is required';
+      this.errorMessage = 'Category is required';
       return;
     }
 
@@ -83,6 +162,8 @@ export class BetCreateComponent {
         this.resetForm();
         this.betPlaced.emit();
         this.campaignService.get(this.campaignId).subscribe();
+        // Reload categories after bet is placed (in case new category was added)
+        this.loadCategories();
       },
       error: (error) => {
         this.errorMessage = error.error?.detail || 'Error placing bet';
@@ -91,11 +172,13 @@ export class BetCreateComponent {
   }
 
   resetForm(): void {
-    this.category = '';
+    this.category = this.availableCategories.length > 0 ? this.availableCategories[0] : '';
     this.odds = 0;
     this.stake = null;
     this.useFullBalance = true;
     this.errorMessage = '';
+    this.showNewCategoryInput = false;
+    this.newCategory = '';
   }
 
   calculateStake(): number {

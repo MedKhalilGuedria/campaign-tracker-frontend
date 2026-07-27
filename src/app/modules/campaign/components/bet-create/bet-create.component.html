@@ -1,9 +1,10 @@
+<!-- src/app/components/bet-create/bet-create.component.html -->
 <h4>Place Bet</h4>
 <div class="card">
   <div class="card-body">
     <!-- Available Balance -->
     <div class="alert alert-info">
-      Available Balance: {{ currentBalance | currencyFormat }}
+      <i class="fas fa-wallet"></i> Available Balance: {{ currentBalance | currencyFormat }}
     </div>
 
     <!-- Stake Selection -->
@@ -39,12 +40,59 @@
       </div>
     </div>
 
-    <!-- Sport Input -->
+    <!-- Category Selection -->
     <div class="form-group">
-      <label>Sport</label>
-      <input class="form-control" placeholder="e.g., Football, Basketball" 
-             [(ngModel)]="category" 
-             [disabled]="currencyService.displayAmount(currentBalance) <= 0">
+      <label>Category</label>
+      <div class="input-group">
+        <select class="form-control" 
+                [(ngModel)]="category" 
+                [disabled]="currencyService.displayAmount(currentBalance) <= 0">
+          <option *ngFor="let cat of categoriesForSelect" [value]="cat.value">
+            {{ cat.label }}
+          </option>
+        </select>
+        <div class="input-group-append">
+          <button class="btn btn-outline-secondary" 
+                  type="button"
+                  (click)="toggleNewCategoryInput()"
+                  [disabled]="currencyService.displayAmount(currentBalance) <= 0"
+                  title="Add new category">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- New Category Input -->
+      <div *ngIf="showNewCategoryInput" class="mt-2">
+        <div class="input-group">
+          <input type="text" 
+                 class="form-control" 
+                 placeholder="Enter new category name"
+                 [(ngModel)]="newCategory"
+                 (keyup.enter)="addNewCategory()">
+          <div class="input-group-append">
+            <button class="btn btn-success" 
+                    type="button"
+                    (click)="addNewCategory()"
+                    [disabled]="isAddingCategory">
+              <i class="fas" [ngClass]="{'fa-spinner fa-spin': isAddingCategory, 'fa-check': !isAddingCategory}"></i>
+              {{ isAddingCategory ? 'Adding...' : 'Add' }}
+            </button>
+            <button class="btn btn-secondary" 
+                    type="button"
+                    (click)="toggleNewCategoryInput()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <small class="form-text text-muted">
+          Press Enter or click Add to save the new category
+        </small>
+      </div>
+      
+      <small class="form-text text-muted" *ngIf="!showNewCategoryInput">
+        Select an existing category or click the + button to add a new one
+      </small>
     </div>
 
     <!-- Odds Input -->
@@ -60,41 +108,45 @@
           <span class="input-group-text">Decimal</span>
         </div>
       </div>
+      <small class="form-text text-muted">Odds must be greater than 1.00</small>
     </div>
 
     <!-- Bet Summary -->
     <div *ngIf="odds > 1 && currencyService.displayAmount(currentBalance) > 0" class="alert alert-success">
       <div class="row">
-        <div class="col">
+        <div class="col-md-4 col-6">
           <strong>Stake:</strong> {{ calculateStake() | currencyFormat }}
         </div>
-        <div class="col">
-          <strong>Odds:</strong> {{ odds }}
+        <div class="col-md-4 col-6">
+          <strong>Odds:</strong> {{ odds | number:'1.2-2' }}
         </div>
-        <div class="col">
+        <div class="col-md-4 col-6">
           <strong>Potential Win:</strong> {{ potentialWin | currencyFormat }}
         </div>
       </div>
       <div class="row mt-2">
-        <div class="col">
+        <div class="col-md-4 col-6">
           <strong>Remaining Balance:</strong> {{ remainingBalance | currencyFormat }}
         </div>
-        <div class="col">
+        <div class="col-md-4 col-6">
           <strong>Potential Profit:</strong> {{ potentialProfit | currencyFormat }}
+        </div>
+        <div class="col-md-4 col-6">
+          <strong>Category:</strong> {{ category | titlecase }}
         </div>
       </div>
     </div>
 
     <!-- Error Message -->
     <div *ngIf="errorMessage" class="alert alert-danger">
-      {{ errorMessage }}
+      <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
     </div>
 
     <!-- Submit Button -->
-    <button class="btn btn-warning" 
+    <button class="btn btn-warning btn-lg btn-block" 
             (click)="submit()" 
             [disabled]="currencyService.displayAmount(currentBalance) <= 0">
-      Place Bet (Stake: {{ calculateStake() | currencyFormat }})
+      <i class="fas fa-gavel"></i> Place Bet (Stake: {{ calculateStake() | currencyFormat }})
     </button>
   </div>
 </div>
